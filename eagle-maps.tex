@@ -1,0 +1,272 @@
+\documentclass{article} 
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[total={6in,9in}]{geometry}
+\usepackage{float}
+
+
+\usepackage{LILLYxLISTINGS}
+\usepackage[chess,hexxagon]{eagle-maps}
+
+\def\email#1{\href{mailto:#1}{#1}}
+
+\def\manArg#1{\T{\{#1\}}}
+\def\optArg#1{\T{\itshape[#1]}}
+
+\def\cmd#1{\lstkwfive{\textbackslash#1}}
+\def\env#1{\lstkwthree{env@#1}}
+
+\def\cmdref#1{\hyperref[mrk:#1]{\lstkwfive{\textbackslash#1}}\textsuperscript{\(\rightarrow\,\)p. \pageref{mrk:#1}}}
+\def\envref#1{\hyperref[mrk:#1]{\lstkwthree{env@#1}}\textsuperscript{\(\rightarrow\,\)p. \pageref{mrk:#1}}}
+
+\makeatletter
+% #1: name of the present-sequence
+% #2: Args of the present-sequence
+% #3: presenter style
+% #4: prefix of cs-name
+\newenvironment{present}[4]{\phantomsection\label{mrk:#1}%
+    \bgroup\leavevmode\newline\noindent\hspace*{-0.75cm}\parbox{0.75cm}{\(\triangleright\)\quad}{\@nameuse{#3}{#4#1}}{\T{#2}}\par\nopagebreak% done on purpose
+}{\egroup\bigskip}
+\makeatother
+
+% #1: name of the command-sequence
+% #2: Args of the command-sequence
+\newenvironment{command}[2]{\present{#1}{#2}{lstkwfive}{\textbackslash}}{\endpresent}
+
+% #1: name of the environment
+% #2: Args of the environment
+\newenvironment{environment}[2]{\present{#1}{#2}{lstkwthree}{env@}}{\endpresent}
+
+
+\title{Documentation for:\\\T{eagle-maps.sty} v1.0}
+\author{Florian Sihler\footnote{\email{florian.sihler@uni-ulm.de}}}
+
+\date{October 25, 2019}
+
+\begin{document}
+    \maketitle
+    \begin{abstract}
+        This package was designed to create maps consisting of different tiles from a top-down perspective. It supports the creation of tiles and players, externalization and some other features regarding typesetting the maps. All Code highlighting will be performed with the \T{LILLYxLISTINGS}-Library from the Lilly-Framework\footnote{\url{https://github.com/EagleoutIce/LILLY}}.
+    \end{abstract}
+
+\section{Prerequisites}
+\subsection{Required Packages}
+
+This Package depends on \T{tikz}\footnote{https://www.ctan.org/pkg/pgf} and \T{environ}\footnote{https://www.ctan.org/pkg/environ}. Furthermore the \T{tikz}-libraries \T{calc} and \T{external} will be loaded.
+
+\subsection{How to use this library}
+\let\T\texttt
+Just put: \blatex{\\input\{eagle-maps\}} into your preamble and place the \T{eagle-maps.sty} in the same folder. Otherwise, you can place it into your \T{texmf}-tree to make it globally available.
+
+\subsection{How to read the documentation}
+
+Any command will be described like this:\par
+\begin{command}{commandName}{\optArg{optional Arg}\manArg{Mandatory Arg 1}\manArg{Mandatory Arg 2}}
+    This text will describe the Command. It can link to other commands/environment aswell: \envref{environmentName}!
+\end{command}
+%
+\begin{environment}{environmentName}{\manArg{Mandatory Arg 1}\manArg{Mandatory Arg 2}}
+    This text will describe the environment (the \T{env@}-prefix is just for clarification and explicitly \emph{no} part of the name). It can link to other commands/environment aswell: \cmdref{commandName}!
+\end{environment}
+
+
+\clearpage
+\section{Functions and Features}
+\subsection{Setting Sizes}
+
+\begin{command}{emSetFieldSize}{\manArg{width}\manArg{height}}
+    This command will set the output-size of the field. They will be stored in the underlying registers: \T{em@len@field@w} and \T{em@len@field@h}. This command is similar to \cmdref{emSetTileSize} and \cmdref{emSetPlayerSize}.
+\end{command}
+
+\begin{command}{emSetTileSize}{\manArg{width}\manArg{height}}
+    This command will set the size of a single tile. They will be stored in the underlying registers: \T{em@len@tile@w} and \T{em@len@tile@h}. This command is similar to \cmdref{emSetFieldSize} and \cmdref{emSetPlayerSize}.
+\end{command}
+
+\begin{command}{emSetPlayerSize}{\manArg{width}\manArg{height}}
+    This command will set the size of a player-token. They will be stored in the underlying registers: \T{em@len@player@w} and \T{em@len@player@h}. This command is similar to \cmdref{emSetFieldSize} and \cmdref{emSetTileSize}.
+\end{command}
+
+\begin{command}{emSetTileOffset}{\manArg{offset x}\manArg{offset y}}
+    Will set the offset between two tiles in the same row (\T{offset x}) and between two lines (\T{offset y}). For convenient use \T{offset x} should be at least the width of a single tile.
+\end{command}
+
+\subsection{Create Players and Tiles}
+
+\begin{command}{emCreateTile}{\optArg{Drawer-Args}\manArg{Tile-Shortcut}\manArg{Tile-Drawer}}
+    This will create a new tile with the name \T{Tile-Shortcut}. Without any modifications you can select betwenn those \T{Tile-Drawer}s: \T{void} (empty), \T{color} (rectangle with color \T{Drawer-Args}) and \T{image} (rectangle with image, located at \T{Drawer-args})\footnote{\textit{You can create your own drawer by defining a macro named \cmd{em@draw@tile@<name>} consuming one argument: \manArg{Drawer-Args}}}. If you want to create a black-squared tile named \T{B} (to use it with \envref{eagle-map*} or \envref{eagle-map} it's recommended (but not necessary) to use only one letters), you can do the following: \blatex[morekeywords={[5]{\\emCreateTile}}]{\\emCreateTile[black]\{T\}\{color\}}. See also: \cmdref{emSetTileSize} and \cmdref{emSetTileOffset}.
+\end{command}
+
+\begin{command}{emCreatePlayer}{\optArg{Default-Drawer-Arg}\manArg{Shortcut}\manArg{Player-Name}\manArg{Color}\manArg{Drawer}}
+    This command will create \cmd{<player>} which will expand to the name of the Player, \cmd{<player>id} expanding to the (unique) Player-ID and \cmd{<player>set} which is a little bit special. It takes an optional Argument which gets passed to the drawer and a mandatory one - the target-position. \cmd{<player>set} \emph{has} to be used inside of a \envref{eagle-map}, \envref{eagle-map*} or \env{tikzpicture} environment. The Drawer can be either \T{color} (\T{Default-Drawer-Arg} will correspond to the color) and \T{image} (\T{Default-Drawer-Arg} will correspond to the image-path)\footnote{\textit{You can create your own drawer by defining a macro named \cmd{em@draw@player@<name>} consuming five arguments: \manArg{coordinate}\manArg{player-color}\manArg{optional-argument}\manArg{player-shortcut}}}. A small example:\emCreatePlayer{playerOne}{Florian}{green}{color}
+    \begin{plainlatex}[morekeywords={[5]{\\emCreatePlayer,\\playerOne,\\playerOneid}}]
+\emCreatePlayer{playerOne}{Florian}{green}{color}
+\playerOne % :yields: !*\lstcomment{\playerOne}*!
+\playerOneid % :yields: !*\lstcomment{\playerOneid}*!
+    \end{plainlatex}
+    See also: \cmdref{emSetPlayerSize}. For more Information about practical usage, consult: \cmdref{emSetPlayerLines} and \cmdref{emSetPlayerColumns}.
+\end{command}
+
+\subsection{Typeset a Map}
+
+\begin{command}{emSetField}{\manArg{Map-Data}}
+    Will set the data for the current map. Has to be a comma-separated list of slash-seperated pairs whereas the key korresponds to the offset as a factor of tiles and the value is a list of Tiles. A small example: \blatex[morekeywords={[5]{\\emSetField}}]{\\emSetField\{\{1/T\},\{0/TPT\},\{1/T\}\}} will (created with \envref{eagle-map*} using the tile created in the description of \cmdref{emCreateTile}, \T{P} being the \T{purple}-variant):
+    \begin{figure}[H]
+        \centering\emCreateTile[black]{T}{color}\emCreateTile[purple]{P}{color}\emSetField{ 1/T, 0/TPT, 1/T }
+    \begin{eagle-map*}\end{eagle-map*}    
+        \caption{Example of a Map}
+    \end{figure}
+\end{command}
+
+\begin{environment}{eagle-map*}{\optArg{Map-Data}}
+If you do not give a \T{Map-Data} the last Map set by \cmdref{emSetField} will be used. The current Drawing-Order is work-in-progress, but you can change the background of the drawn-map by \cmdref{emSetBackground}.
+\end{environment}
+%
+\begin{environment}{eagle-map}{\optArg{Map-Data}\manArg{name}}
+Works similar to \envref{eagle-map*} but tries to externalize the image! \textit{Please note: if you want to use externalization you have to set \cmd{tikzexternalize} into the preamble after importing this package.} \T{name} corresponds to the file-name of the externalized graphic. If you want to create a \T{png}-file instead of a \T{pdf} (only works if the shell-tool \T{convert} is available) see: \cmdref{emUsePng} and \cmdref{emSetPngDensity}.
+\end{environment}
+
+\begin{command}{emSetBackground}{\optArg{*}\manArg{Path}}
+    Will set the \T{Path} to the Background-Image. The unstarred-Version will change the Background-Drawer to the Image-Drawer!.
+\end{command}
+
+\begin{command}{em@draw@map}{}
+    Low-Level-Variant (called by \envref{eagle-map*} and \envref{eagle-map}) to draw the current map. Can be used inside of a \cmd{tikzpicture}.
+\end{command}
+
+\subsection{Externalization}
+
+See also: \envref{eagle-map}. To activate Externalization you \emph{must} type \cmd{tikzexternalize} into your preamble. Consult the \T{pgf}-Documentation for details. \textit{Externalization needs \T{-shell-escape} (or \T{write18}) to be enabled!}
+
+\begin{command}{emUsePng}{}
+    From now on (locked by the current group) the externalization-process will try to conert the graphic to a png. The density can be controlled by \cmdref{emSetPngDensity}.
+\end{command}
+
+\begin{command}{emSetPngDensity}{density}
+    Will change the density for all externalized pngs for the current group. See also: \cmdref{emUsePng}.
+\end{command}
+
+\subsection{Coordinates and other Routines}
+
+Whilst drawing the map \cmd{em@draw@map} will create a named coordinate for every Tile it places. The Coordinates will be prefixed with \T{emline} and suffixed with an incrementing number. Lets make an example, using the map created in the description of \cmdref{emSetField}:
+\begin{plainlst}[alsoletter={-\\\#@*},morekeywords={[4]{eagle-map*}},morekeywords={[5]{\\emSetField}}][listing side text,righthand width=3.5cm]{lLatex}
+\emSetField{ 1/T, 0/TPT, 1/T }
+\begin{eagle-map*}
+    \foreach \i in {1,...,5}{
+        \node[white] at (emline\i) {\bfseries \i};
+    }
+\end{eagle-map*}
+\end{plainlst}
+
+\begin{command}{emCalculateCols}{\optArg{Level-Distance}\manArg{ColumnData}}
+    As it exceeded the time i had for this package there is no implicit converter to translate line- to column-based coordinates (i've written way over \(100\) lines trying to create one), so there is this routine which expect the comma-seperated list to be built up by slash-seperated triplets: \blatex{startOfColumnX(factor)/startOfColumnY(factor)/lengthOfColumn}. If you don't have quadratic-tiles and the height of the tile (\cmdref{emSetTileSize}) differs from the actual \T{y}-offset (\cmdref{emSetTileOffset}), you can specify the offset you like via \T{Level-Distance}.\par Lets redo the example with column-based coordinates (they will be prefixed with \T{emcol}):
+\begin{plainlst}[alsoletter={-\\\#@*},morekeywords={[4]{eagle-map*}},morekeywords={[5]{\\emSetField,\\emCalculateCols}}][listing side text,righthand width=3.5cm]{lLatex}
+\emSetField{ 1/T, 0/TPT, 1/T }
+\begin{eagle-map*}
+    \emCalculateCols{
+        0/1/1,% first col starts at (0,-1)
+        1/0/3,% second col starts at (1,0)
+        2/1/1 % third/last col starts at (2,-1)
+    }
+    \foreach \i in {1,...,5}{
+        \node[white] at (emcol\i) {\bfseries \i};
+    }
+\end{eagle-map*}
+\end{plainlst}
+\end{command}
+
+\begin{command}{emSetPlayerLines}{\manArg{PlayerList}}
+    This Command accepts a comma-sepearted List of slash-sepearted tuples whereas the key refers to the \T{emline}-coordinate id and the value to the player to be set there. We use \cmd{playerOne} created in the explanation for \cmdref{emCreatePlayer}
+\begin{plainlst}[alsoletter={-\\\#@*},morekeywords={[4]{eagle-map*}},morekeywords={[5]{\\emSetField,\\emCalculateCols,\\emSetPlayerLines}}][listing side text,righthand width=3.5cm]{lLatex}
+\emSetField{ 1/T, 0/TPT, 1/T }
+\begin{eagle-map*}
+    \emSetPlayerLines{ 1/playerOne, 4/playerOne}
+\end{eagle-map*}
+\end{plainlst}
+\end{command}
+
+\begin{command}{emSetPlayerColumns}{\manArg{PlayerList}}
+    Works similar to \cmdref{emSetPlayerLines} but the key corresponds to the \T{emcol}-coordinate. Again, with \cmd{playerOne} from \cmdref{emCreatePlayer}:
+\begin{plainlst}[alsoletter={-\\\#@*},morekeywords={[4]{eagle-map*}},morekeywords={[5]{\\emSetField,\\emCalculateCols,\\emSetPlayerColumns}}][listing side text,righthand width=3.5cm]{lLatex}
+\emSetField{ 1/T, 0/TPT, 1/T }
+\begin{eagle-map*}
+    \emCalculateCols{ 0/1/1, 1/0/3, 2/1/1 }
+    \emSetPlayerColumns{ 1/playerOne, 4/playerOne}
+\end{eagle-map*}
+\end{plainlst}
+\end{command}
+
+By the way, you can refer to the placed player-tokens aswell, they will be numbered with each call to \cmd{<player>set} (which \cmdref{emSetPlayerLines} and \cmdref{emSetPlayerColumns} will both execute) to be \T{<player-short><number>}. Let's reuse the example from \cmdref{emSetPlayerLines}:
+\begin{plainlst}[alsoletter={-\\\#@*},morekeywords={[4]{eagle-map*}},morekeywords={[5]{\\emSetField,\\emCalculateCols,\\emSetPlayerLines}}][listing side text,righthand width=3.5cm]{lLatex}
+\emSetField{ 1/T, 0/TPT, 1/T }
+\begin{eagle-map*}
+    \emSetPlayerLines{ 1/playerOne, 4/playerOne}
+    \draw[-latex,white,line width = 4pt] 
+            (playerOne1) -- (playerOne2);
+\end{eagle-map*}
+\end{plainlst}
+
+\section{Included Extensions}
+\subsection{Chess}
+
+To Load this extension, you have to pass \T{chess} as an argument while loading this package: \blatex{\\usepackage[chess]\{eagle-maps\}}. Loading this Package will create the Players \T{black} and \T{white}. Furthermore it will cause the \T{chessfss}-Package to be loaded.
+
+\begin{environment}{em-chess*}{}
+    Will create a Chess-Field using \envref{eagle-map*}. Inside of this Chessfield you can access inidiviual tiles by their (uppercase) chess-coordinate (like \T{A7}, \T{G5}, \ldots).
+\end{environment}
+
+\begin{environment}{em-chess}{FileName}
+    Will create a Chess-Field using \envref{eagle-map} passing the \T{FileName}. See \envref{em-chess*}.
+\end{environment}
+
+\begin{command}{emChessSetBoard}{\manArg{BoardList}}
+    Takes a 2-Dimensional List of tokens. \T{white} will set a white pawn, \T{black} a black pawn (please note, that the default colors are red and blue, as i love them :P). All other figures can be accessed via \T{<color>:<figure-name>}. So: \T{white:king}, \T{black:queen} and so on. If the Figure has a twin (like the rooks), they're named \T{rookA} and \T{rookB} respectively. Furthermore they will create coordinates namend \T{<color><figure-name>}. The pawns will be lettered from \T{A-H}.
+    Let's see an example:
+\begin{plainlst}[alsoletter={-\\\#@*},morekeywords={[4]{em-chess*}},morekeywords={[5]{\\emChessSetBoard}}][listing above text,before lower={\textit{Results in:\newline}}]{lLatex}
+\begin{em-chess*}
+    \emChessSetBoard{%
+        {black:rookB, black:knightB, black:bishopB, black:queen, black:king, black:bishopA, black:knightA, black:rookA},
+        {black,black,black,black,black,black,black,black},
+        {},
+        {},
+        {},
+        {},
+        {white,white,white,white,white,white,white,white},
+        {white:rookA, white:knightA, white:bishopA, white:queen, white:king,white:bishopB, white:knightB, white:rookB}%
+    }
+
+    \draw[lime,thick,->] (A5) -- (H6);
+    \draw[orange,thick,->] (whiteking) -- (blackpawnF);
+\end{em-chess*}
+\end{plainlst}
+\end{command}
+
+\clearpage
+\subsection{Hexxagon}
+
+This extension is work in progres. You can enable it by adding \T{hexxagon} to the list of package-options: \blatex{\\usepackage[hexxagon]\{eagle-maps\}}. Furthermore this Packge needs the folder \T{img} to be located in the same directory! Loading this Package will create the Players \T{playerA} and \T{playerB} using \cmdref{emCreatePlayer}. Furthermore \cmdref{emCalculateCols} will be execute with the correct data.
+
+\begin{environment}{em-hexxagon*}{}
+    Will create a Hexxagon-Field using \envref{eagle-map*}:
+\begin{plainlst}[alsoletter={-\\\#@*},morekeywords={[4]{em-hexxagon*}}][listing above text,before lower={\textit{Results in:\newline}}]{lLatex}
+\begin{em-hexxagon*}
+    \draw[lime,thick,->] (emcol4) -- (emcol42);
+\end{em-hexxagon*}
+\end{plainlst}
+\end{environment}
+
+\begin{environment}{em-hexxagon*}{}
+    Will create a Hexxagon-Field using \envref{eagle-map} passing the \T{FileName}. See \envref{em-hexxagon*}.
+\end{environment}
+
+A little example:
+\begin{plainlst}[alsoletter={-\\\#@*},morekeywords={[4]{em-hexxagon*}},morekeywords={[5]{\\emSetPlayerColumns}}][listing above text,before lower={\textit{Results in:\newline}}]{lLatex}
+\begin{em-hexxagon*}
+    \emSetPlayerColumns{%
+         1/playerA,  4/playerB, 25/playerA,
+        26/playerB, 41/playerA, 61/playerB}
+\end{em-hexxagon*}
+\end{plainlst}
+
+
+\end{document}
