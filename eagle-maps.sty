@@ -10,7 +10,7 @@
 % Dev-Note: Alle Internen Makros/Längen/.... werden durch 'em@' (oder '@em@' für sub/sklaven-makros) angeführt und auf Englisch dokumentiert. Nutzerbefehle werden durch 'em' angeführt.
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{eagle-maps}[2019/10/25 v1.0.3 Visualization of maps in LaTeX]
+\ProvidesPackage{eagle-maps}[2019/10/25 v1.0.4 Visualization of maps in LaTeX]
 
 %% --------------------------------------------------------------------------
 %% Packages
@@ -455,12 +455,12 @@
 \emCreateTile[white]{em@chess@white}{color}
 \def\em@B{{em@chess@black}}\def\em@W{{em@chess@white}}
 
-\def\em@extension@chess@SetDataForChess{
+\def\em@extension@chess@SetDataForChess{%
     \emSetFieldSize{8cm}{8cm}%
     \emSetTileSize{1cm}{1cm}%
     \emSetPlayerSize{0.95cm}{1cm}%
     \emSetTileOffset{1cm}{1cm}%
-    \emSetField{
+    \emSetField{%
         0/\em@W\em@B\em@W\em@B\em@W\em@B\em@W\em@B,
         0/\em@B\em@W\em@B\em@W\em@B\em@W\em@B\em@W,
         0/\em@W\em@B\em@W\em@B\em@W\em@B\em@W\em@B,
@@ -469,7 +469,7 @@
         0/\em@B\em@W\em@B\em@W\em@B\em@W\em@B\em@W,
         0/\em@W\em@B\em@W\em@B\em@W\em@B\em@W\em@B,
         0/\em@B\em@W\em@B\em@W\em@B\em@W\em@B\em@W%
-    }
+    }%
     %Border:
     \def\em@draw@field@background{%
         \draw[line width=1.5pt] (0,0) rectangle ++(\em@len@field@w,-\em@len@field@h);
@@ -550,32 +550,32 @@
                 \coordinate (\em@data@tmp@b\em@data@tmp@c) at (emline\theem@counter@tmp@a);
             \fi%
             \fi%
-        }
-        \pgfmathsetmacro{\em@tmp@linetar}{int(\em@linei*8)}
-        \setcounter{em@counter@tmp@a}{\em@tmp@linetar}
+        }%
+        \pgfmathsetmacro{\em@tmp@linetar}{int(\em@linei*8)}%
+        \setcounter{em@counter@tmp@a}{\em@tmp@linetar}%
     }
 }
 
-\def\em@chess@coordinates{
+\def\em@chess@coordinates{%
     \setcounter{em@counter@tmp@a}{0}% emline counter
-    \foreach \em@number in {8,...,1}{
-        \foreach \em@letter in {A,...,H}{
+    \foreach \em@number in {8,...,1}{%
+        \foreach \em@letter in {A,...,H}{%
             \stepcounter{em@counter@tmp@a}%
             \coordinate (\em@letter\em@number) at (emline\theem@counter@tmp@a);%
-        }
-    }
-}
+        }%
+    }%
+}%
 
 \newcommand\emChessSetBoard[1]{\em@extension@chess@setBoard{#1}}
 
 \newenvironment{em-chess*}{%
-    \bgroup\em@extension@chess@SetDataForChess{}
+    \bgroup\em@extension@chess@SetDataForChess{}%
     \begin{eagle-map*}
-        \em@chess@coordinates{}
+        \em@chess@coordinates{}%
     }{\end{eagle-map*}\egroup}
 
 \newenvironment{em-chess}[1]{%
-    \bgroup\em@extension@chess@SetDataForChess{}
+    \bgroup\em@extension@chess@SetDataForChess{}%
     \@nameuse{eagle-map}{#1}
         \em@chess@coordinates{}
     }{\@nameuse{endeagle-map}\egroup}
@@ -615,47 +615,42 @@
         3*0.75/TTT,%15
         4*0.75/TT,%16
         5*0.75/T%17
+    }%
+    \emSetBackground{img/background}%
+    \emCreateTile[img/tile]{T}{image}%
+    \emCreateTile[img/tilevoid]{V}{image}%
+    \emSetFieldSize{15cm}{7.5cm}%
+    \emSetTileSize{0.1195\em@len@field@w}{0.5\em@len@tile@w}%
+    \emSetTileOffset{1.5\em@len@tile@w}{0.23\em@len@tile@w}%
+    \emSetPlayerSize{0.675\em@len@tile@w}{\em@len@tile@h}%
+    \def\emHexxagonDefaultCols{
+        \emCalculateCols[2*\em@len@tile@offset@y]{%
+            {1*0.75/4/5},%
+            {2*0.75/3/6},%
+            {3*0.75/2/7},%
+            {4*0.75/1/8},%
+            {5*0.75/0/9},%
+            {6*0.75/1/8},%
+            {7*0.75/2/7},%
+            {8*0.75/3/6},%
+            {9*0.75/4/5}%
+        }%
     }
-    \emSetBackground{img/background}
-    \emCreateTile[img/tile]{T}{image}
-    \emCreateTile[img/tilevoid]{V}{image}
-    \emSetFieldSize{15cm}{7.5cm}
-    \emSetTileSize{0.1195\em@len@field@w}{0.5\em@len@tile@w}
-    \emSetTileOffset{1.5\em@len@tile@w}{0.23\em@len@tile@w}
-    \emSetPlayerSize{0.6\em@len@tile@w}{0.6\em@len@tile@h}
 }
 
 % being lazy, copy pasty :P
-\newenvironment{em-hexxagon*}{%
-    \bgroup\em@extension@hexxagon@SetDataForHexxagon{}
-    \begin{eagle-map*}
-        \emCalculateCols[2*\em@len@tile@offset@y]{%
-            {1*0.75/4/5},%
-            {2*0.75/3/6},%
-            {3*0.75/2/7},%
-            {4*0.75/1/8},%
-            {5*0.75/0/9},%
-            {6*0.75/1/8},%
-            {7*0.75/2/7},%
-            {8*0.75/3/6},%
-            {9*0.75/4/5}%
-        }
+\newenvironment{em-hexxagon*}[1][]{%
+    \bgroup\em@extension@hexxagon@SetDataForHexxagon{}%
+    \ifx\\#1\\\else\emSetField{#1}\fi
+    \begin{eagle-map*}%
+        \ifx\\#1\\\emHexxagonDefaultCols{}\fi
     }{\end{eagle-map*}\egroup}
 
-\newenvironment{em-hexxagon}[1]{%
-    \bgroup\em@extension@hexxagon@SetDataForHexxagon{}
-    \@nameuse{eagle-map}{#1}
-        \emCalculateCols[2*\em@len@tile@offset@y]{%
-            {1*0.75/4/5},%
-            {2*0.75/3/6},%
-            {3*0.75/2/7},%
-            {4*0.75/1/8},%
-            {5*0.75/0/9},%
-            {6*0.75/1/8},%
-            {7*0.75/2/7},%
-            {8*0.75/3/6},%
-            {9*0.75/4/5}%
-        }
+\newenvironment{em-hexxagon}[2][]{%
+    \bgroup\em@extension@hexxagon@SetDataForHexxagon{}%
+    \ifx\\#1\\\else\emSetField{#1}\fi
+    \@nameuse{eagle-map}{#2}%
+        \ifx\\#1\\\emHexxagonDefaultCols{}\fi
     }{\@nameuse{endeagle-map}\egroup}
 \fi
 \endinput

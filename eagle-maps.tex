@@ -246,17 +246,18 @@ To Load this extension, you have to pass \T{chess} as an argument while loading 
 
 This extension is work in progres. You can enable it by adding \T{hexxagon} to the list of package-options: \blatex{\\usepackage[hexxagon]\{eagle-maps\}}. Furthermore this Packge needs the folder \T{img} to be located in the same directory! Loading this Package will create the Players \T{playerA} and \T{playerB} using \cmdref{emCreatePlayer}. Furthermore \cmdref{emCalculateCols} will be execute with the correct data.
 
-\begin{environment}{em-hexxagon*}{}
+\begin{environment}{em-hexxagon*}{\optArg{FieldData}}
     Will create a Hexxagon-Field using \envref{eagle-map*}:
 \begin{plainlst}[alsoletter={-\\\#@*},morekeywords={[4]{em-hexxagon*}}][listing above text,before lower={\textit{Results in:\newline}}]{lLatex}
 \begin{em-hexxagon*}
     \draw[lime,thick,->] (emcol4) -- (emcol42);
 \end{em-hexxagon*}
 \end{plainlst}
+    \textit{Please Note! If you provide a custom Field \cmdref{emCalculateCols} won't be executed. You can use the default Map-Data used for the included-field by executing \cmdref{emHexxagonDefaultCols} inside of the \envref{em-hexxagon*}.}
 \end{environment}
 
-\begin{environment}{em-hexxagon*}{}
-    Will create a Hexxagon-Field using \envref{eagle-map} passing the \T{FileName}. See \envref{em-hexxagon*}.
+\begin{environment}{em-hexxagon}{\optArg{FieldData}\manArg{FileName}}
+    Will create a Hexxagon-Field using \envref{eagle-map} passing the \T{FileName}. See \envref{em-hexxagon*} (the rule regarding \T{FieldData} applies!).
 \end{environment}
 
 A little example:
@@ -267,6 +268,10 @@ A little example:
         26/playerB, 41/playerA, 61/playerB}
 \end{em-hexxagon*}
 \end{plainlst}
+
+\begin{command}{emHexxagonDefaultCols}{}
+    Will call \cmdref{emCalculateCols} with the default map-Data for Hexxagon-Fields. 
+\end{command}
 
 
 \end{document}
