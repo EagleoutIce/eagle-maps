@@ -244,6 +244,20 @@
     }
 }
 
+% same as without @specific, please not that i was explicitly copied as it may be suspect to some other changes in the future
+% #3 will denote the player
+\def\em@helper@player@specific@iter#1#2#3{
+    \foreach \coordinateID in {#2} {
+        \edef\em@tmp{\noexpand\@em@helper@player@checkopt#3:\noexpand\@nil}\em@tmp
+        % \typeout{got for: #1\coordinateID: \em@data@tmp@b\space and \em@data@tmp@c}
+        \@ifundefined{\em@data@tmp@b set}{
+            \PackageError{eagle-maps}{The Player with the shortcut '\em@data@tmp@b' is unknown!\MessageBreak it should be set at: (#1\coordinateID)}{You can create the Player by: \protect\emCreatePlayer[]{\em@data@tmp@b}{<name>}{<color>}{<drawer>}{}}
+        }{%
+            \expandafter\ifx\expandafter\\\em@data@tmp@c\\ \@nameuse{\em@data@tmp@b set}{#1\coordinateID}% no optional
+            \else\@nameuse{\em@data@tmp@b set}[\em@data@tmp@b]{#1\coordinateID}\fi %% got optional
+        }
+    }
+}
 %% --------------------------------------------------------------------------
 %% Drawer
 %% --------------------------------------------------------------------------
@@ -408,7 +422,8 @@
 \newcommand\emCalculateCols[2][\em@len@tile@h]{\em@calculate@points@col{#2}{#1}}
 \newcommand\emSetPlayerLines[1]{\em@helper@player@iter{emline}{#1}}
 \newcommand\emSetPlayerColumns[1]{\em@helper@player@iter{emcol}{#1}}
-
+\newcommand\emSetOnePlayerLines[2]{\em@helper@player@specific@iter{emline}{#2}{#1}}
+\newcommand\emSetOnePlayerColumns[2]{\em@helper@player@specific@iter{emcol}{#2}{#1}}
 
 
 % Now we want to be able to externalize our map.

@@ -112,7 +112,7 @@ Any command will be described like this:\par
 \begin{command}{emSetField}{\manArg{Map-Data}}
     Will set the data for the current map. Has to be a comma-separated list of slash-seperated pairs whereas the key korresponds to the offset as a factor of tiles and the value is a list of Tiles. A small example: \blatex[morekeywords={[5]{\\emSetField}}]{\\emSetField\{\{1/T\},\{0/TPT\},\{1/T\}\}} will (created with \envref{eagle-map*} using the tile created in the description of \cmdref{emCreateTile}, \T{P} being the \T{purple}-variant):
     \begin{figure}[H]
-        \centering\emCreateTile[black]{T}{color}\emCreateTile[purple]{P}{color}\emSetField{ 1/T, 0/TPT, 1/T }
+        \centering\emCreateTile[black]{T}{color}\emCreateTile[purple]{P}{color}\emSetField{1/T, 0/TPT, 1/T}
     \begin{eagle-map*}\end{eagle-map*}    
         \caption{Example of a Map}
     \end{figure}
@@ -150,7 +150,7 @@ See also: \envref{eagle-map}. To activate Externalization you \emph{must} type \
 
 Whilst drawing the map \cmd{em@draw@map} will create a named coordinate for every Tile it places. The Coordinates will be prefixed with \T{emline} and suffixed with an incrementing number. Lets make an example, using the map created in the description of \cmdref{emSetField}:
 \begin{plainlst}[alsoletter={-\\\#@*},morekeywords={[4]{eagle-map*}},morekeywords={[5]{\\emSetField}}][listing side text,righthand width=3.5cm]{lLatex}
-\emSetField{ 1/T, 0/TPT, 1/T }
+\emSetField{1/T, 0/TPT, 1/T}
 \begin{eagle-map*}
     \foreach \i in {1,...,5}{
         \node[white] at (emline\i) {\bfseries \i};
@@ -161,7 +161,7 @@ Whilst drawing the map \cmd{em@draw@map} will create a named coordinate for ever
 \begin{command}{emCalculateCols}{\optArg{Level-Distance}\manArg{ColumnData}}
     As it exceeded the time i had for this package there is no implicit converter to translate line- to column-based coordinates (i've written way over \(100\) lines trying to create one), so there is this routine which expect the comma-seperated list to be built up by slash-seperated triplets: \blatex{startOfColumnX(factor)/startOfColumnY(factor)/lengthOfColumn}. If you don't have quadratic-tiles and the height of the tile (\cmdref{emSetTileSize}) differs from the actual \T{y}-offset (\cmdref{emSetTileOffset}), you can specify the offset you like via \T{Level-Distance}.\par Lets redo the example with column-based coordinates (they will be prefixed with \T{emcol}):
 \begin{plainlst}[alsoletter={-\\\#@*},morekeywords={[4]{eagle-map*}},morekeywords={[5]{\\emSetField,\\emCalculateCols}}][listing side text,righthand width=3.5cm]{lLatex}
-\emSetField{ 1/T, 0/TPT, 1/T }
+\emSetField{1/T, 0/TPT, 1/T}
 \begin{eagle-map*}
     \emCalculateCols{
         0/1/1,% first col starts at (0,-1)
@@ -178,9 +178,9 @@ Whilst drawing the map \cmd{em@draw@map} will create a named coordinate for ever
 \begin{command}{emSetPlayerLines}{\manArg{PlayerList}}
     This Command accepts a comma-sepearted List of slash-sepearted tuples whereas the key refers to the \T{emline}-coordinate id and the value to the player to be set there. We use \cmd{playerOne} created in the explanation for \cmdref{emCreatePlayer}
 \begin{plainlst}[alsoletter={-\\\#@*},morekeywords={[4]{eagle-map*}},morekeywords={[5]{\\emSetField,\\emCalculateCols,\\emSetPlayerLines}}][listing side text,righthand width=3.5cm]{lLatex}
-\emSetField{ 1/T, 0/TPT, 1/T }
+\emSetField{1/T, 0/TPT, 1/T}
 \begin{eagle-map*}
-    \emSetPlayerLines{ 1/playerOne, 4/playerOne}
+    \emSetPlayerLines{1/playerOne, 4/playerOne}
 \end{eagle-map*}
 \end{plainlst}
 \end{command}
@@ -188,19 +188,33 @@ Whilst drawing the map \cmd{em@draw@map} will create a named coordinate for ever
 \begin{command}{emSetPlayerColumns}{\manArg{PlayerList}}
     Works similar to \cmdref{emSetPlayerLines} but the key corresponds to the \T{emcol}-coordinate. Again, with \cmd{playerOne} from \cmdref{emCreatePlayer}:
 \begin{plainlst}[alsoletter={-\\\#@*},morekeywords={[4]{eagle-map*}},morekeywords={[5]{\\emSetField,\\emCalculateCols,\\emSetPlayerColumns}}][listing side text,righthand width=3.5cm]{lLatex}
-\emSetField{ 1/T, 0/TPT, 1/T }
+\emSetField{1/T, 0/TPT, 1/T}
 \begin{eagle-map*}
-    \emCalculateCols{ 0/1/1, 1/0/3, 2/1/1 }
-    \emSetPlayerColumns{ 1/playerOne, 4/playerOne}
+    \emCalculateCols{0/1/1, 1/0/3, 2/1/1}
+    \emSetPlayerColumns{1/playerOne, 4/playerOne}
 \end{eagle-map*}
 \end{plainlst}
 \end{command}
 
+\begin{command}{emSetOnePlayerLines}{\manArg{player}\manArg{LineID-List}}
+    Works similar to \cmdref{emSetPlayerLines} but this time you don't have to specifiy the player to use. Again, with \cmd{playerOne} from \cmdref{emCreatePlayer}:
+\begin{plainlst}[alsoletter={-\\\#@*},morekeywords={[4]{eagle-map*}},morekeywords={[5]{\\emSetField,\\emCalculateCols,\\emSetOnePlayerLines}}][listing side text,righthand width=3.5cm]{lLatex}
+\emSetField{1/T, 0/TPT, 1/T}
+\begin{eagle-map*}
+    \emSetOnePlayerLines{playerOne}{1,3,4}
+\end{eagle-map*}
+\end{plainlst}
+\end{command}
+
+\begin{command}{emSetOnePlayerColumns}{\manArg{player}\manArg{ColID-List}}
+As \cmdref{emSetPlayerColumns} is equivalent to \cmdref{emSetPlayerLines} this is the equivalent to \cmdref{emSetOnePlayerLines}.
+\end{command}
+
 By the way, you can refer to the placed player-tokens aswell, they will be numbered with each call to \cmd{<player>set} (which \cmdref{emSetPlayerLines} and \cmdref{emSetPlayerColumns} will both execute) to be \T{<player-short><number>}. Let's reuse the example from \cmdref{emSetPlayerLines}:
 \begin{plainlst}[alsoletter={-\\\#@*},morekeywords={[4]{eagle-map*}},morekeywords={[5]{\\emSetField,\\emCalculateCols,\\emSetPlayerLines}}][listing side text,righthand width=3.5cm]{lLatex}
-\emSetField{ 1/T, 0/TPT, 1/T }
+\emSetField{1/T, 0/TPT, 1/T}
 \begin{eagle-map*}
-    \emSetPlayerLines{ 1/playerOne, 4/playerOne}
+    \emSetPlayerLines{1/playerOne, 4/playerOne}
     \draw[-latex,white,line width = 4pt] 
             (playerOne1) -- (playerOne2);
 \end{eagle-map*}
