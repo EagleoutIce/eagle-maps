@@ -110,7 +110,7 @@ Any command will be described like this:\par
 \subsection{Typeset a Map}
 
 \begin{command}{emSetField}{\manArg{Map-Data}}
-    Will set the data for the current map. Has to be a comma-separated list of slash-seperated pairs whereas the key korresponds to the offset as a factor of tiles and the value is a list of Tiles. A small example: \blatex[morekeywords={[5]{\\emSetField}}]{\\emSetField\{\{1/T\},\{0/TPT\},\{1/T\}\}} will (created with \envref{eagle-map*} using the tile created in the description of \cmdref{emCreateTile}, \T{P} being the \T{purple}-variant):
+    Will set the data for the current map. Has to be a comma-separated list of slash-seperated pairs whereas the key korresponds to the offset as a factor of tiles and the value is a list of Tiles. A small example: \blatex[morekeywords={[5]{\\emSetField}}]{\\emSetField\{\{1/T\},\{0/TPT\},\{1/T\}\}} (created with \envref{eagle-map*} using the tile created in the description of \cmdref{emCreateTile}, \T{P} being the \T{purple}-variant):
     \begin{figure}[H]
         \centering\emCreateTile[black]{T}{color}\emCreateTile[purple]{P}{color}\emSetField{1/T, 0/TPT, 1/T}
     \begin{eagle-map*}\end{eagle-map*}    
@@ -142,7 +142,7 @@ See also: \envref{eagle-map}. To activate Externalization you \emph{must} type \
     From now on (locked by the current group) the externalization-process will try to conert the graphic to a png. The density can be controlled by \cmdref{emSetPngDensity}.
 \end{command}
 
-\begin{command}{emSetPngDensity}{density}
+\begin{command}{emSetPngDensity}{\manArg{density}}
     Will change the density for all externalized pngs for the current group. See also: \cmdref{emUsePng}.
 \end{command}
 
@@ -287,5 +287,22 @@ A little example:
     Will call \cmdref{emCalculateCols} with the default map-Data for Hexxagon-Fields. 
 \end{command}
 
+This is another example for the usage of the Hexagon field:
+\begin{plainlst}[alsoletter={-\\\#@*},morekeywords={[4]{em-hexxagon*}},morekeywords={[5]{\\emSetPlayerColumns,\\emSetOnePlayerColumns}}][listing above text,before lower={\textit{Results in:\newline}}]{lLatex}
+\begin{center}
+    \resizebox{0.5\linewidth}{!}{
+        \begin{em-hexxagon*}
+            \foreach \i in {1,...,61}{
+                \node[rectangle,fill=white, fill opacity=0.75] at (emcol\i) {\i};
+            }
+        \end{em-hexxagon*}
+    }\resizebox{0.5\linewidth}{!}{
+        \begin{em-hexxagon*}
+            \emSetOnePlayerColumns{playerA}{22,23,30,32,39,40}
+            \emSetOnePlayerColumns{playerB}{1,5,27,35,57,61}
+        \end{em-hexxagon*}
+    }
+\end{center}
+\end{plainlst}
 
 \end{document}
