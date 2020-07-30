@@ -271,11 +271,13 @@
 
 %% Background Drawers:
 \def\em@draw@background@image{%
+    \expandafter\ifx\expandafter\\\em@data@background@image\\\else%
     \draw[color=black!0,use as bounding box, path picture={%
         \node at (path picture bounding box.center) {%
             \includegraphics[width=\em@len@field@w]{\em@data@background@image}
         };%
      }] (0,0) rectangle (\em@len@field@w,-\em@len@field@h);%
+     \fi%
 }
 
 
@@ -652,6 +654,10 @@
         }%
     }
 }
+\def\em@extension@hexxagon@SetDataForHexxagon@reset{%
+    \emSetField{}%
+    \emSetBackground{}%
+}
 
 % being lazy, copy pasty :P
 \newenvironment{em-hexxagon*}[1][]{%
@@ -659,13 +665,13 @@
     \ifx\\#1\\\else\emSetField{#1}\fi
     \begin{eagle-map*}%
         \ifx\\#1\\\emHexxagonDefaultCols{}\fi
-    }{\end{eagle-map*}\egroup}
+    }{\end{eagle-map*}\em@extension@hexxagon@SetDataForHexxagon@reset\egroup}
 
 \newenvironment{em-hexxagon}[2][]{%
     \bgroup\em@extension@hexxagon@SetDataForHexxagon{}%
     \ifx\\#1\\\else\emSetField{#1}\fi
     \@nameuse{eagle-map}{#2}%
         \ifx\\#1\\\emHexxagonDefaultCols{}\fi
-    }{\@nameuse{endeagle-map}\egroup}
+    }{\@nameuse{endeagle-map}\em@extension@hexxagon@SetDataForHexxagon@reset\egroup}
 \fi
 \endinput
