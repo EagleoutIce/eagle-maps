@@ -1,3 +1,5 @@
+[![made-with-latex](https://img.shields.io/badge/Made%20with-LaTeX-1f425f.svg)](https://www.latex-project.org/) [![GPL license](https://img.shields.io/badge/License-GPL-blue.svg)](http://perso.crans.org/besson/LICENSE.html) 
+
 # eagle-maps.sty
 
 This LaTeX2e-Package allwos the simple creation of maps using TikZ. It offers coordinate-generation, player-handling, tile-control and much more.
