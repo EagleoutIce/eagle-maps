@@ -1,4 +1,4 @@
-\documentclass{article} 
+\documentclass{article}
 
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
@@ -119,7 +119,7 @@ Any command will be described like this:\par
     Will set the data for the current map. Has to be a comma-separated list of slash-separated pairs whereas the key corresponds to the offset as a factor of tiles and the value is a list of Tiles. A small example: \blatex[morekeywords={[5]{\\emSetField}}]{\\emSetField\{\{1/T\},\{0/TPT\},\{1/T\}\}} (created with \envref{eagle-map*} using the tile created in the description of \cmdref{emCreateTile}, \T{P} being the \T{purple}-variant):
     \begin{figure}[H]
         \centering\emCreateTile[black]{T}{color}\emCreateTile[purple]{P}{color}\emSetField{1/T, 0/TPT, 1/T}
-    \begin{eagle-map*}\end{eagle-map*}    
+    \begin{eagle-map*}\end{eagle-map*}
         \caption{Example of a Map}
     \end{figure}
 \end{command}
@@ -221,7 +221,7 @@ By the way, you can refer to the placed player-tokens as well, they will be numb
 \emSetField{1/T, 0/TPT, 1/T}
 \begin{eagle-map*}
     \emSetPlayerLines{1/playerOne, 4/playerOne}
-    \draw[-latex,white,line width = 4pt] 
+    \draw[-latex,white,line width = 4pt]
             (playerOne1) -- (playerOne2);
 \end{eagle-map*}
 \end{plainlst}
@@ -264,7 +264,7 @@ To Load this extension, you have to pass \T{chess} as an argument while loading 
 \clearpage
 \subsection{Hexxagon}
 
-This extension is work in progress. You can enable it by adding \T{hexxagon} to the list of package-options: \blatex{\\usepackage[hexxagon]\{eagle-maps\}}. Furthermore this Package needs the folder \T{img} to be located in the same directory! Loading this Package will create the Players \T{playerA} and \T{playerB} using \cmdref{emCreatePlayer}. Furthermore \cmdref{emCalculateCols} will be execute with the correct data.
+This extension is work in progress. You can enable it by adding \T{hexxagon} to the list of package-options: \blatex{\\usepackage[hexxagon]\{eagle-maps\}}. Furthermore this Package needs the folder \T{eagle-maps-images} to be located in the same directory! Loading this Package will create the Players \T{playerA} and \T{playerB} using \cmdref{emCreatePlayer}. Furthermore \cmdref{emCalculateCols} will be execute with the correct data.
 
 \begin{environment}{em-hexxagon*}{\optArg{FieldData}}
     Will create a Hexxagon-Field using \envref{eagle-map*}:
@@ -290,7 +290,7 @@ A little example:
 \end{plainlst}
 
 \begin{command}{emHexxagonDefaultCols}{}
-    Will call \cmdref{emCalculateCols} with the default map-Data for Hexxagon-Fields. 
+    Will call \cmdref{emCalculateCols} with the default map-Data for Hexxagon-Fields.
 \end{command}
 
 This is another example for the usage of the Hexagon field:
