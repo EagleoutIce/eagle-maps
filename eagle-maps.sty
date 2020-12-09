@@ -499,13 +499,15 @@
     }%
 }
 
+\colorlet{chesswhite}{purple}
+\colorlet{chessblack}{teal}
 % note: #3 is Chess figure
 \def\em@draw@player@chessfigure#1#2#3#4{%
     \def\tmp@a{#2}\def\tmp@b{white}%
     \ifx\tmp@a\tmp@b\relax% white figure
-        \node[purple] at (#1) {\bfseries\huge#3};%
+        \node[chesswhite] at (#1) {\bfseries\huge#3};%
     \else% black figure
-        \node[teal] at (#1) {\bfseries\huge#3};% \boardfont\rlap{\lowercase{#3}}{\color{white}\uppercase{#3}} (the font isn't centered ^^ )
+        \node[chessblack] at (#1) {\bfseries\huge#3};% \boardfont\rlap{\lowercase{#3}}{\color{white}\uppercase{#3}} (the font isn't centered ^^ )
     \fi
     % \fill[#2,#3] (#1) ellipse[x radius=\em@len@player@w/2,y radius=\em@len@player@h/2];%
     \edef\em@tmp{\noexpand\coordinate (#4\@nameuse{theem@counter@player@#4@tokens}) at(#1);}\em@tmp% mark!
@@ -549,8 +551,8 @@
     \def\em@tmp@white{white}%
     \foreach[count=\em@linei] \em@line in {#1}{%
         \foreach \em@figure in \em@line{
-            \expandafter\ifx\expandafter\\\em@figure\else% only if something is set
             \stepcounter{em@counter@tmp@a}
+            \expandafter\ifx\expandafter\\\em@figure\else% only if something is set
             \edef\em@tmp{\noexpand\@em@helper@player@checkopt\em@figure:\noexpand\@nil}\em@tmp%
             % \em@data@tmp@b will now contain first, \em@data@tmp@c second if given
             \expandafter\ifx\expandafter\\\em@data@tmp@c\\% no optional => pawn
