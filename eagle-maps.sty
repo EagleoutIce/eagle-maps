@@ -467,9 +467,11 @@
 \usepackage{chessfss}
 \setfigfontfamily{berlin}%
 
+\colorlet{chessfieldblack}{black}
+\colorlet{chessfieldwhite}{white}
 % This extension will create all things needed for a chess game
-\emCreateTile[black]{em@chess@black}{color}
-\emCreateTile[white]{em@chess@white}{color}
+\emCreateTile[chessfieldblack]{em@chess@black}{color}
+\emCreateTile[chessfieldwhite]{em@chess@white}{color}
 \def\em@B{{em@chess@black}}\def\em@W{{em@chess@white}}
 
 \def\em@extension@chess@SetDataForChess{%
