@@ -55,13 +55,13 @@
     }
 \end{center}
     \begin{abstract}
-        This package was designed to create maps consisting of different tiles from a top-down perspective. It supports the creation of tiles and players, externalization and some other features regarding typesetting the maps. All Code highlighting will be performed with the \T{LILLYxLISTINGS}-Library from the Lilly-Framework\footnote{\url{https://github.com/EagleoutIce/LILLY}}.
+        This package was designed to create maps consisting of different tiles from a top-down perspective. It supports the creation of tiles and players, externalization and some other features regarding typesetting the maps. All Code highlighting will be performed with the \T{LILLYxLISTINGS}-Library from the Lilly-Framework.\footnote{\url{https://github.com/EagleoutIce/LILLY}}
     \end{abstract}
 
 \section{Prerequisites}
 \subsection{Required Packages}
 
-This Package depends on \T{tikz}\footnote{https://www.ctan.org/pkg/pgf} and \T{environ}\footnote{https://www.ctan.org/pkg/environ}. Furthermore the \T{tikz}-libraries \T{calc} and \T{external} will be loaded.
+This Package depends on \T{tikz}\footnote{https://www.ctan.org/pkg/pgf} and \T{environ}.\footnote{https://www.ctan.org/pkg/environ} Furthermore the \T{tikz}-libraries \T{calc} and \T{external} will be loaded.
 
 \subsection{How to use this library}
 \let\T\texttt
@@ -100,11 +100,11 @@ Any command will be described like this:\par
 \subsection{Create Players and Tiles}
 
 \begin{command}{emCreateTile}{\optArg{Drawer-Args}\manArg{Tile-Shortcut}\manArg{Tile-Drawer}}
-    This will create a new tile with the name \T{Tile-Shortcut}. Without any modifications you can select between those \T{Tile-Drawer}s: \T{void} (empty), \T{color} (rectangle with color \T{Drawer-Args}) and \T{image} (rectangle with image, located at \T{Drawer-args})\footnote{\textit{You can create your own drawer by defining a macro named \cmd{em@draw@tile@<name>} consuming one argument: \manArg{Drawer-Args}}}. If you want to create a black-squared tile named \T{B} (to use it with \envref{eagle-map*} or \envref{eagle-map} it's recommended (but not necessary) to use only one letters), you can do the following: \blatex[morekeywords={[5]{\\emCreateTile}}]{\\emCreateTile[black]\{T\}\{color\}}. See also: \cmdref{emSetTileSize} and \cmdref{emSetTileOffset}.
+    This will create a new tile with the name \T{Tile-Shortcut}. Without any modifications you can select between those \T{Tile-Drawer}s: \T{void} (empty), \T{color} (rectangle with color \T{Drawer-Args}) and \T{image} (rectangle with image, located at \T{Drawer-args}).\footnote{\textit{You can create your own drawer by defining a macro named \cmd{em@draw@tile@<name>} consuming one argument: \manArg{Drawer-Args}}} If you want to create a black-squared tile named \T{B} (to use it with \envref{eagle-map*} or \envref{eagle-map} it's recommended (but not necessary) to use only one letters), you can do the following: \blatex[morekeywords={[5]{\\emCreateTile}}]{\\emCreateTile[black]\{T\}\{color\}}. See also: \cmdref{emSetTileSize} and \cmdref{emSetTileOffset}.
 \end{command}
 
 \begin{command}{emCreatePlayer}{\optArg{Default-Drawer-Arg}\manArg{Shortcut}\manArg{Player-Name}\manArg{Color}\manArg{Drawer}}
-    This command will create \cmd{<player>} which will expand to the name of the Player, \cmd{<player>id} expanding to the (unique) Player-ID and \cmd{<player>set} which is a little bit special. It takes an optional Argument which gets passed to the drawer and a mandatory one - the target-position. \cmd{<player>set} \emph{has} to be used inside of a \envref{eagle-map}, \envref{eagle-map*} or \env{tikzpicture} environment. The Drawer can be either \T{color} (\T{Default-Drawer-Arg} will correspond to the color) and \T{image} (\T{Default-Drawer-Arg} will correspond to the image-path)\footnote{\textit{You can create your own drawer by defining a macro named \cmd{em@draw@player@<name>} consuming five arguments: \manArg{coordinate}\manArg{player-color}\manArg{optional-argument}\manArg{player-shortcut}}}. A small example:\emCreatePlayer{playerOne}{Florian}{green}{color}
+    This command will create \cmd{<player>} which will expand to the name of the Player, \cmd{<player>id} expanding to the (unique) Player-ID and \cmd{<player>set} which is a little bit special. It takes an optional Argument which gets passed to the drawer and a mandatory one - the target-position. \cmd{<player>set} \emph{has} to be used inside of a \envref{eagle-map}, \envref{eagle-map*} or \env{tikzpicture} environment. The Drawer can be either \T{color} (\T{Default-Drawer-Arg} will correspond to the color) and \T{image} (\T{Default-Drawer-Arg} will correspond to the image-path).\footnote{\textit{You can create your own drawer by defining a macro named \cmd{em@draw@player@<name>} consuming five arguments: \manArg{coordinate}\manArg{player-color}\manArg{optional-argument}\manArg{player-shortcut}}} A small example:\emCreatePlayer{playerOne}{Florian}{green}{color}
     \begin{plainlatex}[morekeywords={[5]{\\emCreatePlayer,\\playerOne,\\playerOneid}}]
 \emCreatePlayer{playerOne}{Florian}{green}{color}
 \playerOne % :yields: !*\lstcomment{\playerOne}*!
