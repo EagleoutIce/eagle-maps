@@ -6,7 +6,16 @@
 \usepackage{float}
 
 
-\usepackage{LILLYxLISTINGS}
+\usepackage[cpalette,numinpar,encoding]{sopra-listings}
+
+
+
+\usepackage[defaults]{lecture-links}
+\usepackage{hyperref,nameref}
+\usepackage[hyperref]{color-palettes}
+
+\solLoadLanguage{latex}
+
 \usepackage[chess,hexxagon]{eagle-maps}
 
 \def\email#1{\href{mailto:#1}{#1}}
@@ -14,11 +23,11 @@
 \def\manArg#1{\T{\{#1\}}}
 \def\optArg#1{\T{\itshape[#1]}}
 
-\def\cmd#1{\lstkwfive{\textbackslash#1}}
-\def\env#1{\lstkwthree{env@#1}}
+\def\cmd#1{\solGet{command}{\textbackslash#1}}
+\def\env#1{\solGet{keywordC}{env@#1}}
 
-\def\cmdref#1{\hyperref[mrk:#1]{\lstkwfive{\textbackslash#1}}\textsuperscript{\(\rightarrow\,\)p. \pageref{mrk:#1}}}
-\def\envref#1{\hyperref[mrk:#1]{\lstkwthree{env@#1}}\textsuperscript{\(\rightarrow\,\)p. \pageref{mrk:#1}}}
+\def\cmdref#1{\hyperref[mrk:#1]{\solGet{command}{\textbackslash#1}}\textsuperscript{\(\rightarrow\,\)p. \pageref{mrk:#1}}}
+\def\envref#1{\hyperref[mrk:#1]{\solGet{keywordC}{env@#1}}\textsuperscript{\(\rightarrow\,\)p. \pageref{mrk:#1}}}
 
 \makeatletter
 % #1: name of the present-sequence
@@ -26,17 +35,17 @@
 % #3: presenter style
 % #4: prefix of cs-name
 \newenvironment{present}[4]{\phantomsection\label{mrk:#1}%
-    \bgroup\leavevmode\newline\noindent\hspace*{-0.75cm}\parbox{0.75cm}{\(\triangleright\)\quad}{\@nameuse{#3}{#4#1}}{\T{#2}}\par\nopagebreak% done on purpose
+    \bgroup\leavevmode\newline\noindent\hspace*{-0.75cm}\parbox{0.75cm}{\(\triangleright\)\quad}{\solGet{#3}{#4#1}}{\T{#2}}\par\nopagebreak% done on purpose
 }{\egroup\bigskip}
 \makeatother
 
 % #1: name of the command-sequence
 % #2: Args of the command-sequence
-\newenvironment{command}[2]{\present{#1}{#2}{lstkwfive}{\textbackslash}}{\endpresent}
+\newenvironment{command}[2]{\present{#1}{#2}{command}{\textbackslash}}{\endpresent}
 
 % #1: name of the environment
 % #2: Args of the environment
-\newenvironment{environment}[2]{\present{#1}{#2}{lstkwthree}{env@}}{\endpresent}
+\newenvironment{environment}[2]{\present{#1}{#2}{keywordC}{env@}}{\endpresent}
 
 
 \title{Documentation for:\\\T{eagle-maps.sty} v1.0}
@@ -107,8 +116,8 @@ Any command will be described like this:\par
     This command will create \cmd{<player>} which will expand to the name of the Player, \cmd{<player>id} expanding to the (unique) Player-ID and \cmd{<player>set} which is a little bit special. It takes an optional Argument which gets passed to the drawer and a mandatory one - the target-position. \cmd{<player>set} \emph{has} to be used inside of a \envref{eagle-map}, \envref{eagle-map*} or \env{tikzpicture} environment. The Drawer can be either \T{color} (\T{Default-Drawer-Arg} will correspond to the color) and \T{image} (\T{Default-Drawer-Arg} will correspond to the image-path)\footnote{\textit{You can create your own drawer by defining a macro named \cmd{em@draw@player@<name>} consuming five arguments: \manArg{coordinate}\manArg{player-color}\manArg{optional-argument}\manArg{player-shortcut}}}. A small example:\emCreatePlayer{playerOne}{Florian}{green}{color}
     \begin{plainlatex}[morekeywords={[5]{\\emCreatePlayer,\\playerOne,\\playerOneid}}]
 \emCreatePlayer{playerOne}{Florian}{green}{color}
-\playerOne % :yields: !*\lstcomment{\playerOne}*!
-\playerOneid % :yields: !*\lstcomment{\playerOneid}*!
+\playerOne % :yields: !*\solGet{comment}{\playerOne}*!
+\playerOneid % :yields: !*\solGet{comment}{\playerOneid}*!
     \end{plainlatex}
     See also: \cmdref{emSetPlayerSize}. For more Information about practical usage, consult: \cmdref{emSetPlayerLines} and \cmdref{emSetPlayerColumns}.
 \end{command}
@@ -155,18 +164,18 @@ See also: \envref{eagle-map}. To activate Externalization you \emph{must} type \
 \subsection{Coordinates and other Routines}
 
 Whilst drawing the map \cmd{em@draw@map} will create a named coordinate for every Tile it places. The Coordinates will be prefixed with \T{emline} and suffixed with an incrementing number. Lets make an example, using the map created in the description of \cmdref{emSetField}:
-\begin{plainlst}[alsoletter={-\\\#@*},morekeywords={[4]{eagle-map*}},morekeywords={[5]{\\emSetField}}][listing side text,righthand width=3.5cm]{lLatex}
+\begin{plainlatex}[alsoletter={-\\\#@*},morekeywords={[4]{eagle-map*}},morekeywords={[5]{\\emSetField}}][listing side text,righthand width=3.5cm]
 \emSetField{1/T, 0/TPT, 1/T}
 \begin{eagle-map*}
     \foreach \i in {1,...,5}{
         \node[white] at (emline\i) {\bfseries \i};
     }
 \end{eagle-map*}
-\end{plainlst}
+\end{plainlatex}
 
 \begin{command}{emCalculateCols}{\optArg{Level-Distance}\manArg{ColumnData}}
     As it exceeded the time i had for this package there is no implicit converter to translate line- to column-based coordinates (i've written way over \(100\) lines trying to create one), so there is this routine which expect the comma-separated list to be built up by slash-separated triplets: \blatex{startOfColumnX(factor)/startOfColumnY(factor)/lengthOfColumn}. If you don't have quadratic-tiles and the height of the tile (\cmdref{emSetTileSize}) differs from the actual \T{y}-offset (\cmdref{emSetTileOffset}), you can specify the offset you like via \T{Level-Distance}.\par Lets redo the example with column-based coordinates (they will be prefixed with \T{emcol}):
-\begin{plainlst}[alsoletter={-\\\#@*},morekeywords={[4]{eagle-map*}},morekeywords={[5]{\\emSetField,\\emCalculateCols}}][listing side text,righthand width=3.5cm]{lLatex}
+\begin{plainlatex}[alsoletter={-\\\#@*},morekeywords={[4]{eagle-map*}},morekeywords={[5]{\\emSetField,\\emCalculateCols}}][listing side text,righthand width=3.5cm]
 \emSetField{1/T, 0/TPT, 1/T}
 \begin{eagle-map*}
     \emCalculateCols{
@@ -178,38 +187,38 @@ Whilst drawing the map \cmd{em@draw@map} will create a named coordinate for ever
         \node[white] at (emcol\i) {\bfseries \i};
     }
 \end{eagle-map*}
-\end{plainlst}
+\end{plainlatex}
 \end{command}
 
 \begin{command}{emSetPlayerLines}{\manArg{PlayerList}}
     This Command accepts a comma-separated List of slash-separated tuples whereas the key refers to the \T{emline}-coordinate id and the value to the player to be set there. We use \cmd{playerOne} created in the explanation for \cmdref{emCreatePlayer}
-\begin{plainlst}[alsoletter={-\\\#@*},morekeywords={[4]{eagle-map*}},morekeywords={[5]{\\emSetField,\\emCalculateCols,\\emSetPlayerLines}}][listing side text,righthand width=3.5cm]{lLatex}
+\begin{plainlatex}[alsoletter={-\\\#@*},morekeywords={[4]{eagle-map*}},morekeywords={[5]{\\emSetField,\\emCalculateCols,\\emSetPlayerLines}}][listing side text,righthand width=3.5cm]
 \emSetField{1/T, 0/TPT, 1/T}
 \begin{eagle-map*}
     \emSetPlayerLines{1/playerOne, 4/playerOne}
 \end{eagle-map*}
-\end{plainlst}
+\end{plainlatex}
 \end{command}
 
 \begin{command}{emSetPlayerColumns}{\manArg{PlayerList}}
     Works similar to \cmdref{emSetPlayerLines} but the key corresponds to the \T{emcol}-coordinate. Again, with \cmd{playerOne} from \cmdref{emCreatePlayer}:
-\begin{plainlst}[alsoletter={-\\\#@*},morekeywords={[4]{eagle-map*}},morekeywords={[5]{\\emSetField,\\emCalculateCols,\\emSetPlayerColumns}}][listing side text,righthand width=3.5cm]{lLatex}
+\begin{plainlatex}[alsoletter={-\\\#@*},morekeywords={[4]{eagle-map*}},morekeywords={[5]{\\emSetField,\\emCalculateCols,\\emSetPlayerColumns}}][listing side text,righthand width=3.5cm]
 \emSetField{1/T, 0/TPT, 1/T}
 \begin{eagle-map*}
     \emCalculateCols{0/1/1, 1/0/3, 2/1/1}
     \emSetPlayerColumns{1/playerOne, 4/playerOne}
 \end{eagle-map*}
-\end{plainlst}
+\end{plainlatex}
 \end{command}
 
 \begin{command}{emSetOnePlayerLines}{\manArg{player}\manArg{LineID-List}}
     Works similar to \cmdref{emSetPlayerLines} but this time you don't have to specify the player to use. Again, with \cmd{playerOne} from \cmdref{emCreatePlayer}:
-\begin{plainlst}[alsoletter={-\\\#@*},morekeywords={[4]{eagle-map*}},morekeywords={[5]{\\emSetField,\\emCalculateCols,\\emSetOnePlayerLines}}][listing side text,righthand width=3.5cm]{lLatex}
+\begin{plainlatex}[alsoletter={-\\\#@*},morekeywords={[4]{eagle-map*}},morekeywords={[5]{\\emSetField,\\emCalculateCols,\\emSetOnePlayerLines}}][listing side text,righthand width=3.5cm]
 \emSetField{1/T, 0/TPT, 1/T}
 \begin{eagle-map*}
     \emSetOnePlayerLines{playerOne}{1,3,4}
 \end{eagle-map*}
-\end{plainlst}
+\end{plainlatex}
 \end{command}
 
 \begin{command}{emSetOnePlayerColumns}{\manArg{player}\manArg{ColID-List}}
@@ -217,14 +226,14 @@ As \cmdref{emSetPlayerColumns} is equivalent to \cmdref{emSetPlayerLines} this i
 \end{command}
 
 By the way, you can refer to the placed player-tokens as well, they will be numbered with each call to \cmd{<player>set} (which \cmdref{emSetPlayerLines} and \cmdref{emSetPlayerColumns} will both execute) to be \T{<player-short><number>}. Let's reuse the example from \cmdref{emSetPlayerLines}:
-\begin{plainlst}[alsoletter={-\\\#@*},morekeywords={[4]{eagle-map*}},morekeywords={[5]{\\emSetField,\\emCalculateCols,\\emSetPlayerLines}}][listing side text,righthand width=3.5cm]{lLatex}
+\begin{plainlatex}[alsoletter={-\\\#@*},morekeywords={[4]{eagle-map*}},morekeywords={[5]{\\emSetField,\\emCalculateCols,\\emSetPlayerLines}}][listing side text,righthand width=3.5cm]
 \emSetField{1/T, 0/TPT, 1/T}
 \begin{eagle-map*}
     \emSetPlayerLines{1/playerOne, 4/playerOne}
     \draw[-latex,white,line width = 4pt]
             (playerOne1) -- (playerOne2);
 \end{eagle-map*}
-\end{plainlst}
+\end{plainlatex}
 
 \section{Included Extensions}
 \subsection{Chess}
@@ -242,7 +251,7 @@ To Load this extension, you have to pass \T{chess} as an argument while loading 
 \begin{command}{emChessSetBoard}{\manArg{BoardList}}
     Takes a 2-Dimensional List of tokens. \T{white} will set a white pawn, \T{black} a black pawn (please note, that the default colors are red and blue, as i love them :P). All other figures can be accessed via \T{<color>:<figure-name>}. So: \T{white:king}, \T{black:queen} and so on. If the Figure has a twin (like the rooks), they're named \T{rookA} and \T{rookB} respectively. Furthermore they will create coordinates named \T{<color><figure-name>}. The pawns will be lettered from \T{A-H}.
     Let's see an example:
-\begin{plainlst}[alsoletter={-\\\#@*},morekeywords={[4]{em-chess*}},morekeywords={[5]{\\emChessSetBoard}}][listing above text,before lower={\textit{Results in:\newline}}]{lLatex}
+\begin{plainlatex}[alsoletter={-\\\#@*},morekeywords={[4]{em-chess*}},morekeywords={[5]{\\emChessSetBoard}}][listing above text,before lower={\textit{Results in:\newline}}]
 \begin{em-chess*}
     \emChessSetBoard{%
         {black:rookB, black:knightB, black:bishopB, black:queen, black:king, black:bishopA, black:knightA, black:rookA},
@@ -258,7 +267,7 @@ To Load this extension, you have to pass \T{chess} as an argument while loading 
     \draw[lime,thick,->] (A5) -- (H6);
     \draw[orange,thick,->] (whiteking) -- (blackpawnF);
 \end{em-chess*}
-\end{plainlst}
+\end{plainlatex}
 \end{command}
 
 \clearpage
@@ -268,11 +277,11 @@ This extension is work in progress. You can enable it by adding \T{hexxagon} to 
 
 \begin{environment}{em-hexxagon*}{\optArg{FieldData}}
     Will create a Hexxagon-Field using \envref{eagle-map*}:
-\begin{plainlst}[alsoletter={-\\\#@*},morekeywords={[4]{em-hexxagon*}}][listing above text,before lower={\textit{Results in:\newline}}]{lLatex}
+\begin{plainlatex}[alsoletter={-\\\#@*},morekeywords={[4]{em-hexxagon*}}][listing above text,before lower={\textit{Results in:\newline}}]
 \begin{em-hexxagon*}
     \draw[lime,thick,->] (emcol4) -- (emcol42);
 \end{em-hexxagon*}
-\end{plainlst}
+\end{plainlatex}
     \textit{Please Note! If you provide a custom Field \cmdref{emCalculateCols} won't be executed. You can use the default Map-Data used for the included-field by executing \cmdref{emHexxagonDefaultCols} inside of the \envref{em-hexxagon*}.}
 \end{environment}
 
@@ -281,20 +290,20 @@ This extension is work in progress. You can enable it by adding \T{hexxagon} to 
 \end{environment}
 
 A little example:
-\begin{plainlst}[alsoletter={-\\\#@*},morekeywords={[4]{em-hexxagon*}},morekeywords={[5]{\\emSetPlayerColumns}}][listing above text,before lower={\textit{Results in:\newline}}]{lLatex}
+\begin{plainlatex}[alsoletter={-\\\#@*},morekeywords={[4]{em-hexxagon*}},morekeywords={[5]{\\emSetPlayerColumns}}][listing above text,before lower={\textit{Results in:\newline}}]
 \begin{em-hexxagon*}
     \emSetPlayerColumns{%
          1/playerA,  4/playerB, 25/playerA,
         26/playerB, 41/playerA, 61/playerB}
 \end{em-hexxagon*}
-\end{plainlst}
+\end{plainlatex}
 
 \begin{command}{emHexxagonDefaultCols}{}
     Will call \cmdref{emCalculateCols} with the default map-Data for Hexxagon-Fields.
 \end{command}
 
 This is another example for the usage of the Hexagon field:
-\begin{plainlst}[alsoletter={-\\\#@*},morekeywords={[4]{em-hexxagon*}},morekeywords={[5]{\\emSetPlayerColumns,\\emSetOnePlayerColumns}}][listing above text,before lower={\textit{Results in:\newline}}]{lLatex}
+\begin{plainlatex}[alsoletter={-\\\#@*},morekeywords={[4]{em-hexxagon*}},morekeywords={[5]{\\emSetPlayerColumns,\\emSetOnePlayerColumns}}][listing above text,before lower={\textit{Results in:\newline}}]
 \begin{center}
     \resizebox{0.5\linewidth}{!}{
         \begin{em-hexxagon*}
@@ -309,6 +318,6 @@ This is another example for the usage of the Hexagon field:
         \end{em-hexxagon*}
     }
 \end{center}
-\end{plainlst}
+\end{plainlatex}
 
 \end{document}
