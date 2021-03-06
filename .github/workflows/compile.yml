@@ -4,6 +4,7 @@ name: compile documentation
     branches:
     - master
     - main
+  workflow_dispatch:
 
 jobs:
   build:
