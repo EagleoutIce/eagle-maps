@@ -1,39 +1,24 @@
 %% eagle-maps.sty
-%%
-%% --------
-%%
 %% Autor: Florian Sihler, 25.10.2019
 %%
 %% Dieses Paket ist im Rahmen des Sopra-Projekts WiSe19/SoSe20 an der Uni Ulm enstanden. Es erlaubt die Visualisierung eines Hexxagon-Feldes in LaTeX.
 %% Die Nummerierung der Felder kann sowohl zeilenweise, als auch spaltenweise (Standard) erfolgen.
-
 % Dev-Note: Alle Internen Makros/Längen/.... werden durch 'em@' (oder '@em@' für sub/sklaven-makros) angeführt und auf Englisch dokumentiert. Nutzerbefehle werden durch 'em' angeführt.
-
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{eagle-maps}[2019/10/25 v1.0.4 Visualization of maps in LaTeX]
 
 %% Packages
-%% --------
-
-\RequirePackage{tikz}
+\RequirePackage{tikz,environ}
 \usetikzlibrary{calc,external}
 
-\RequirePackage{environ}% for: NewEnviron
-
 %% Arguments for Extensions
-%% --------
-
 \newif\ifem@loadchessextension@
 \DeclareOption{chess}{\em@loadchessextension@true}
-
 \newif\ifem@loadhexxagonextension@
 \DeclareOption{hexxagon}{\em@loadhexxagonextension@true}
-
 \ProcessOptions\relax
 
 %% Lenghts/Dimens/Counters
-%% --------
-
 % Set the target width and height of a field:
 % Set by ULM: \emSetFieldSize#1#2
 \newlength\em@len@field@w \em@len@field@w=15cm
@@ -59,22 +44,16 @@
 \newlength\em@len@tile@offset@y \em@len@tile@offset@y=\em@len@tile@h%.5
 
 % temporary registers
-\newlength\em@len@tmp@a
-\newlength\em@len@tmp@b
+\newlength\em@len@tmp@a \newlength\em@len@tmp@b
+\newlength\em@len@tmp@x \newlength\em@len@tmp@y
 
-\newlength\em@len@tmp@x
-\newlength\em@len@tmp@y
-
-\newcounter{em@counter@player@id}%will hold the current maximum for the playerids
-
-
-\newcounter{em@counter@tmp@a}%
-\newcounter{em@counter@tmp@b}%
-\newcounter{em@counter@tmp@c}%
+%will hold the current maximum for the playerids
+\newcounter{em@counter@player@id}
+\newcounter{em@counter@tmp@a}
+\newcounter{em@counter@tmp@b}
+\newcounter{em@counter@tmp@c}
 
 %% Data-Registers
-%% --------
-
 % ',' seperated list of '/'-seperated pairs (pgffor)
 % A/B => A will be the offset as a factor of tiles to start the drawing in this line
 %        B will be the pattern of tiles
@@ -92,8 +71,6 @@
 \def\em@data@tmp@c{}
 
 %% Point calculation
-%% --------
-
 % as this whole process made me cry and took way too much time, I decided I want more information from the user.
 % More specifically: amount of columns, and their height:
 
@@ -102,32 +79,26 @@
 % can be colled by: \emCalculateCols[2][]
 % #1: col data, #2 offset for
 \def\em@calculate@points@col#1#2{
-    \setcounter{em@counter@tmp@a}{0}%
-    \foreach \em@startOffsetFactorX/\em@startOffsetFactorY/\em@amountOfTiles in {#1} {%
-        \foreach \em@curTileHeight in {1,...,\em@amountOfTiles} {
-            \stepcounter{em@counter@tmp@a}
-            \pgfmathsetmacro\em@targetX{\em@startOffsetFactorX*\em@len@tile@w}
-            \pgfmathsetmacro\em@targetY{\em@startOffsetFactorY*\em@len@tile@offset@y+(\em@curTileHeight-1)*#2}
-            \coordinate (emcol\theem@counter@tmp@a) at ($(\em@targetX pt,-\em@targetY pt)+(\em@len@tile@w/2,-\em@len@tile@h/2)$);
-        }
+\setcounter{em@counter@tmp@a}{0}%
+\foreach \em@startOffsetFactorX/\em@startOffsetFactorY/\em@amountOfTiles in {#1} {%
+    \foreach \em@curTileHeight in {1,...,\em@amountOfTiles} {
+        \stepcounter{em@counter@tmp@a}
+        \pgfmathsetmacro\em@targetX{\em@startOffsetFactorX*\em@len@tile@w}
+        \pgfmathsetmacro\em@targetY{\em@startOffsetFactorY*\em@len@tile@offset@y+(\em@curTileHeight-1)*#2}
+        \coordinate (emcol\theem@counter@tmp@a) at ($(\em@targetX pt,-\em@targetY pt)+(\em@len@tile@w/2,-\em@len@tile@h/2)$);
     }
-}
-
-
+}}
 
 %% Registration of a tile
-%% --------
-
 % will create a new tile
 % #1 Tile 'shortcut'
 % #2 Tile-drawer suffix (\em@draw@tile@<suffix>)
 % #3 Argument for the Tile-drawer
 % called by ULM: \emCreateTile[3][]
 \def\em@creator@tile#1#2#3{%
-    \expandafter\xdef\csname em@tiles@tileid@#1\endcsname{%
-        \expandafter\noexpand\csname em@draw@tile@#2\endcsname{#3}%
-    }
-}
+\expandafter\xdef\csname em@tiles@tileid@#1\endcsname{%
+    \expandafter\noexpand\csname em@draw@tile@#2\endcsname{#3}%
+}}
 
 % this macro-collection will iterate over a list of tiles and call the appropiate
 % handler based from its init location it will call the appropriate drawer and set
@@ -137,24 +108,22 @@
 % 'init' or 'last' location for the current line. It will prefix the normal numbers:
 % with: 'emline#' whereas # refers to the line-based ID of the tile
 \def\@em@helper@tile@iterator#1#2 \@nil{%
-    % \def\em@tmpa{#1}\def\em@tmpb{#2}
-    % is the iteration at an end:
-    \ifx!#1!\else% set first
-        \stepcounter{em@counter@tmp@a}%
-        \stepcounter{em@counter@tmp@b}% calculate maximum tiles
-        \@ifundefined{em@tiles@tileid@#1}{% tile unknown:
-            \PackageError{eagle-maps}{The Tile with the id '#1' is unknown!\MessageBreak it should be set at: (\the\em@len@tmp@x,\the\em@len@tmp@y)}{You can create the tile by: \protect\emCreateTile[]{#1}{<drawer>}}
-        }{% tile is known:
-            \@nameuse{em@tiles@tileid@#1}%
-        }%
-        \coordinate (emline\theem@counter@tmp@a) at ($(\em@len@tmp@x,\em@len@tmp@y)+(\em@len@tile@w/2,-\em@len@tile@h/2)$);
-        \ifx!#2!\else% set second:
-            % increment x offset x
-            \addtolength{\em@len@tmp@x}{\em@len@tile@offset@x}%
-            \@em@helper@tile@iterator#2 \@nil%
-        \fi
+% is the iteration at an end:
+\ifx!#1!\else% set first
+    \stepcounter{em@counter@tmp@a}%
+    \stepcounter{em@counter@tmp@b}% calculate maximum tiles
+    \@ifundefined{em@tiles@tileid@#1}{% tile unknown:
+        \PackageError{eagle-maps}{The Tile with the id '#1' is unknown!\MessageBreak it should be set at: (\the\em@len@tmp@x,\the\em@len@tmp@y)}{You can create the tile by: \protect\emCreateTile[]{#1}{<drawer>}}
+    }{% tile is known:
+        \csname em@tiles@tileid@#1\endcsname
+    }%
+    \coordinate (emline\theem@counter@tmp@a) at ($(\em@len@tmp@x,\em@len@tmp@y)+(\em@len@tile@w/2,-\em@len@tile@h/2)$);
+    \ifx!#2!\else% set second:
+        % increment x offset x
+        \addtolength{\em@len@tmp@x}{\em@len@tile@offset@x}%
+        \@em@helper@tile@iterator#2 \@nil
     \fi
-}
+\fi}
 
 \def\@em@helper@tile@iter#1{%
 \setcounter{em@counter@tmp@b}{0}%
@@ -166,8 +135,6 @@
 }
 
 %% Registration of a player
-%% --------
-
 % will create a new player.
 % each player gets the \<player>-command which will print the name of the player
 % furthermore there will be a \<player>set[2][] command which will set a player-token
@@ -185,25 +152,25 @@
 % called by ULM: \emCreatePlayer[5][]
 \def\em@creator@player#1#2#3#4#5{%
     \stepcounter{em@counter@player@id}% new player => new IDD
-    \newcounter{em@counter@player@#1@tokens}
+    \newcounter{em@counter@player@#1@tokens}%
     % \<player>
-    \expandafter\xdef\csname #1\endcsname{#2}%
+    \expandafter\protected@xdef\csname #1\endcsname{#2}%
     % \<player>id
-    \expandafter\xdef\csname #1id\endcsname{\theem@counter@player@id}%
+    \expandafter\protected@xdef\csname #1id\endcsname{\theem@counter@player@id}%
 
     % \<player>set
     \expandafter\gdef\csname #1set\endcsname{\stepcounter{em@counter@player@#1@tokens}% number the tokens of player BLAH
-        \@ifnextchar[{\@nameuse{#1set@opt}}{\@nameuse{#1set@noopt}}
+        \@ifnextchar[{\csname #1set@opt\endcsname}{\csname #1set@noopt\endcsname}
     }%
     % we've got an optional argument:
     \expandafter\gdef\csname #1set@opt\endcsname[##1]##2{%
         % #1: cooredinates, #2: colors, #3: opts, #4: playershort
-        \@nameuse{em@draw@player@#4}{##2}{#3}{##1}{#1}%
+        \csname em@draw@player@#4\endcsname{##2}{#3}{##1}{#1}%
     }%
     % there was no optional argument:
     \expandafter\gdef\csname #1set@noopt\endcsname##1{%
         % #1: cooredinates, #2: colors, #3: opts, #4: playershort
-        \@nameuse{em@draw@player@#4}{##1}{#3}{#5}{#1}%
+        \csname em@draw@player@#4\endcsname{##1}{#3}{#5}{#1}%
     }
 }
 
@@ -220,85 +187,72 @@
 % #1 coordinate-prefix
 % #2 list of 'A/B' values => A: id of coordinate, B: player-shortcut it can be: '<player-shortcut>:<optional-arg>' aswell
 % this macro can be called by either '\emSetPlayerLines#1' or '\emSetPlayerColumns#1 (note: this needs the cols to be calculated)'
-\def\em@helper@player@iter#1#2{
-    \foreach \coordinateID/\player in {#2} {
-        \edef\em@tmp{\noexpand\@em@helper@player@checkopt\player:\noexpand\@nil}\em@tmp
-        % \typeout{got for: #1\coordinateID: \em@data@tmp@b\space and \em@data@tmp@c}
-        \@ifundefined{\em@data@tmp@b set}{
-            \PackageError{eagle-maps}{The Player with the shortcut '\em@data@tmp@b' is unknown!\MessageBreak it should be set at: (#1\coordinateID)}{You can create the Player by: \protect\emCreatePlayer[]{\em@data@tmp@b}{<name>}{<color>}{<drawer>}{}}
-        }{%
-            \ifx\em@data@tmp@c\@empty%no optional:
-                \@nameuse{\em@data@tmp@b set}{#1\coordinateID}%
-            \else% got optional:
-                \@nameuse{\em@data@tmp@b set}[\em@data@tmp@b]{#1\coordinateID}%
-            \fi
-        }
+\def\em@helper@player@iter#1#2{%
+\foreach \coordinateID/\player in {#2} {
+    \edef\em@tmp{\noexpand\@em@helper@player@checkopt\player:\noexpand\@nil}\em@tmp
+    % \typeout{got for: #1\coordinateID: \em@data@tmp@b\space and \em@data@tmp@c}
+    \@ifundefined{\em@data@tmp@b set}{
+        \PackageError{eagle-maps}{The Player with the shortcut '\em@data@tmp@b' is unknown!\MessageBreak it should be set at: (#1\coordinateID)}{You can create the Player by: \protect\emCreatePlayer[]{\em@data@tmp@b}{<name>}{<color>}{<drawer>}{}}
+    }{%
+        \ifx\em@data@tmp@c\@empty%no optional:
+            \csname\em@data@tmp@b set\endcsname{#1\coordinateID}%
+        \else% got optional:
+            \csname\em@data@tmp@b set\endcsname[\em@data@tmp@b]{#1\coordinateID}%
+        \fi
     }
-}
+}}
 
 % same as without @specific, please not that i was explicitly copied as it may be suspect to some other changes in the future
 % #3 will denote the player
 \def\em@helper@player@specific@iter#1#2#3{
-    \foreach \coordinateID in {#2} {
-        \edef\em@tmp{\noexpand\@em@helper@player@checkopt#3:\noexpand\@nil}\em@tmp
-        % \typeout{got for: #1\coordinateID: \em@data@tmp@b\space and \em@data@tmp@c}
-        \@ifundefined{\em@data@tmp@b set}{
-            \PackageError{eagle-maps}{The Player with the shortcut '\em@data@tmp@b' is unknown!\MessageBreak it should be set at: (#1\coordinateID)}{You can create the Player by: \protect\emCreatePlayer[]{\em@data@tmp@b}{<name>}{<color>}{<drawer>}{}}
-        }{%
-            \ifx\em@data@tmp@c\@empty \@nameuse{\em@data@tmp@b set}{#1\coordinateID}% no optional
-            \else\@nameuse{\em@data@tmp@b set}[\em@data@tmp@b]{#1\coordinateID}\fi%% got optional
-        }
+\foreach \coordinateID in {#2} {
+    \edef\em@tmp{\noexpand\@em@helper@player@checkopt#3:\noexpand\@nil}\em@tmp
+    % \typeout{got for: #1\coordinateID: \em@data@tmp@b\space and \em@data@tmp@c}
+    \@ifundefined{\em@data@tmp@b set}{
+        \PackageError{eagle-maps}{The Player with the shortcut '\em@data@tmp@b' is unknown!\MessageBreak it should be set at: (#1\coordinateID)}{You can create the Player by: \protect\emCreatePlayer[]{\em@data@tmp@b}{<name>}{<color>}{<drawer>}{}}
+    }{%
+        \ifx\em@data@tmp@c\@empty \csname\em@data@tmp@b set\endcsname{#1\coordinateID}% no optional
+        \else\csname\em@data@tmp@b set\endcsname[\em@data@tmp@b]{#1\coordinateID}\fi%% got optional
     }
-}
+}}
 
 %% Drawer
-%% --------
-
 % the following macros will define the way the field gets drawn. they will obey by the following order:
 % [field@] pre, background, tiles and extras. The rest can be embedded with normal tikz-commands
 % (0,0) will be the upper left corner
-
 % this one draws nothing:
 \def\em@draw@void{}
 
 %% Background Drawers:
 \def\em@draw@background@image{%
-    \ifx\em@data@background@image\@empty\else
-    \draw[color=black!0,use as bounding box, path picture={%
-        \node at (path picture bounding box.center) {%
-            \includegraphics[width=\em@len@field@w]{\em@data@background@image}
-        };%
-     }] (0,0) rectangle (\em@len@field@w,-\em@len@field@h);%
-     \fi
-}
-
+\ifx\em@data@background@image\@empty\else
+\draw[color=black!0,use as bounding box, path picture={%
+    \node at (path picture bounding box.center) {%
+        \includegraphics[width=\em@len@field@w]{\em@data@background@image}
+    };%
+    }] (0,0) rectangle (\em@len@field@w,-\em@len@field@h);%
+\fi}
 
 %% Tile drawers:
 \def\em@draw@tile@void#1{}
-
 \def\em@draw@tile@color#1{%
     \fill[#1] (\em@len@tmp@x,\em@len@tmp@y) rectangle ++(\em@len@tile@w,-\em@len@tile@h);%
 }
 
 \def\em@draw@tile@image#1{%
-    \path[path picture={%
-        \node at (path picture bounding box.center) {%
-            \includegraphics[width=\em@len@tile@w]{#1}
-        };%
-     }] (\em@len@tmp@x,\em@len@tmp@y) rectangle ++(\em@len@tile@w,-\em@len@tile@h);%
+\path[path picture={%
+    \node at (path picture bounding box.center) {%
+        \includegraphics[width=\em@len@tile@w]{#1}
+    };%
+    }] (\em@len@tmp@x,\em@len@tmp@y) rectangle ++(\em@len@tile@w,-\em@len@tile@h);%
 }
 
-
 %% Player drawers:
-% #1 target coordinates
-% #2 color
-% #3 optional argument
-% #4 player-shortcut
-
+% target coordinates | color | optional argument | player-shortcut
 % note: #3 is tikzargs
 \def\em@draw@player@color#1#2#3#4{%
     \fill[#2,#3] (#1) ellipse[x radius=\em@len@player@w/2,y radius=\em@len@player@h/2];%
-    \edef\em@tmp{\noexpand\coordinate (#4\@nameuse{theem@counter@player@#4@tokens}) at(#1);}\em@tmp% mark!
+    \coordinate (#4\csname theem@counter@player@#4@tokens\endcsname) at(#1);
 }
 
 % note: #3 is path to image, color (#2) ignored
@@ -308,30 +262,27 @@
             \includegraphics[width=\em@len@player@w]{#3}
         };%
      }] (#1)++(-\em@len@player@w/2,\em@len@player@h/2) rectangle ++(\em@len@player@w,-\em@len@player@h);%
-     \edef\em@tmp{\noexpand\coordinate (#4\@nameuse{theem@counter@player@#4@tokens}) at(#1);}\em@tmp% mark!
+     \coordinate (#4\csname theem@counter@player@#4@tokens\endcsname) at(#1);
 }
 
-\let\em@draw@field@pre\em@draw@void             % pre
-\let\em@draw@field@background\em@draw@void      % background
+\let\em@draw@field@pre\em@draw@void % pre
+\let\em@draw@field@background\em@draw@void % background
 
 \def\em@draw@field@tiles{%
-    \setlength{\em@len@tmp@y}{0pt}%
+    \em@len@tmp@y\z@
     \setcounter{em@counter@tmp@a}{0}%
     \gdef\em@data@tmp@a{0}% will hold the maximum amount of tiles
     \foreach \em@startOffsetFactor/\em@tilePattern in \em@data@field {%
-        \pgfmathsetmacro{\em@targetX}{\em@startOffsetFactor*\em@len@tile@w}%
-        \setlength{\em@len@tmp@x}{\em@targetX pt}%
+        \pgfmathsetmacro\em@targetX{\em@startOffsetFactor*\em@len@tile@w}%
+        \em@len@tmp@x=\em@targetX\p@
         \edef\em@tmp{\noexpand\@em@helper@tile@iter{\em@tilePattern}}\em@tmp%
         % increment line y:
-        \pgfmathsetmacro{\em@targetY}{\em@len@tmp@y-\the\em@len@tile@offset@y}%
         % with calc loaded, there is no global add to length
-        \global\em@len@tmp@y=\em@targetY pt%
-        % \typeout{X: \the\em@len@tmp@y; \the\em@len@tile@offset@y}
+        \global\em@len@tmp@y=\the\dimexpr\em@len@tmp@y-\the\em@len@tile@offset@y\relax
     }
 }
 
 \let\em@draw@field@extras\em@draw@void% extras
-
 
 % This macro will call the other drawers in their necessary order
 \def\em@draw@map{%
@@ -342,8 +293,6 @@
 }
 
 %% Externalization
-%% --------
-
 % As most maps will consume waaaaay to much memory if compiled to pdf we want to
 % add the option to compile to png.
 % The png-implementation is heavily based on: https://tex.stackexchange.com/questions/74605/tikz-external-use-png-as-default-instead-of-pdf#74608
@@ -354,47 +303,40 @@
 \def\em@external@png@density{300}
 
 \tikzset{%
-    /pgf/images/external info,
-    png export/.style={
-        external/system call=%
-        {pdflatex \tikzexternalcheckshellescape -halt-on-error -interaction=batchmode -jobname "\image" "\texsource" &&%
-         convert -density \em@external@png@density\space -transparent white "\image.pdf" "\image.png"; rm -f "\image.pdf"},
-    },
-    em@setExternalPng/.style={png export,png import},
-    png import/.code={%
-        \tikzset{%
-            /pgf/images/include external/.code={%
-                \includegraphics%
-                [width=\pgfexternalwidth,height=\pgfexternalheight]%
-                {{##1}.png}%
-            }%
+/pgf/images/external info,
+png export/.style={
+    external/system call=%
+    {pdflatex \tikzexternalcheckshellescape -halt-on-error -interaction=batchmode -jobname "\image" "\texsource" &&%
+        convert -density \em@external@png@density\space -transparent white "\image.pdf" "\image.png"; rm -f "\image.pdf"},
+},
+em@setExternalPng/.style={png export,png import},
+png import/.code={%
+    \tikzset{%
+        /pgf/images/include external/.code={%
+            \includegraphics%
+            [width=\pgfexternalwidth,height=\pgfexternalheight]%
+            {{##1}.png}%
         }%
     }%
-}
+}}
 
 %% User Level Macros
-%% --------
-
 \newcommand*\emSetField[1]{\xdef\em@data@field{#1}}
 % #1: width, #2: height
 \newcommand*\emSetFieldSize[2]{%
-    \em@len@field@w=#1%
-    \em@len@field@h=#2%
+    \em@len@field@w=#1\relax \em@len@field@h=#2%
 }
 % #1: width, #2: height
 \newcommand*\emSetTileSize[2]{%
-    \em@len@tile@w=#1%
-    \em@len@tile@h=#2%
+    \em@len@tile@w=#1\relax \em@len@tile@h=#2%
 }
 % #1: width, #2: height
 \newcommand*\emSetPlayerSize[2]{%
-    \em@len@player@w=#1%
-    \em@len@player@h=#2%
+    \em@len@player@w=#1\relax \em@len@player@h=#2%
 }
 % #1: offsetx, #2: offsety
 \newcommand*\emSetTileOffset[2]{%
-    \em@len@tile@offset@x=#1%
-    \em@len@tile@offset@y=#2%
+    \em@len@tile@offset@x=#1\relax \em@len@tile@offset@y=#2%
 }
 % This unstarred variant will furthermore CHANGE the drawer to draw the image
 \newcommand*\emSetBackground{%
@@ -410,19 +352,16 @@
 \newcommand\emUsePng{\tikzset{em@setExternalPng}}
 \newcommand\emSetPngDensity[1]{\gdef\em@external@png@density{#1}}
 
-
 \newcommand\emCalculateCols[2][\em@len@tile@h]{\em@calculate@points@col{#2}{#1}}
 \newcommand\emSetPlayerLines[1]{\em@helper@player@iter{emline}{#1}}
 \newcommand\emSetPlayerColumns[1]{\em@helper@player@iter{emcol}{#1}}
 \newcommand\emSetOnePlayerLines[2]{\em@helper@player@specific@iter{emline}{#2}{#1}}
 \newcommand\emSetOnePlayerColumns[2]{\em@helper@player@specific@iter{emcol}{#2}{#1}}
 
-
 % Now we want to be able to externalize our map.
 % Note: if you want the externalization to work, just type '\tikzexternalize'
 % anywhere after including this package. It will obey by your rules.
 % Note furthermore, that 'eagle-map*' will never be externalized!
-
 % create the behind-the-scenes environments:
 % #1 the map data that should be used
 \newenvironment{eagle-map*}[1][]{%
@@ -437,19 +376,15 @@
 
 % to make externalization work without problems we will not nest the call
 \NewEnviron{eagle-map}[2][]{%
-    \begingroup\tikzexternalenable
-    \ifx!#2!\else\tikzsetnextfilename{#2}\fi
-    \ifx!#1!\else\xdef\em@data@field{#1}\fi
-    \begin{tikzpicture}%
-        \em@draw@map
-        \BODY
-    \end{tikzpicture}\tikzexternaldisable\endgroup}
-
-
+\begingroup\tikzexternalenable
+\ifx!#2!\else\tikzsetnextfilename{#2}\fi
+\ifx!#1!\else\xdef\em@data@field{#1}\fi
+\begin{tikzpicture}%
+    \em@draw@map
+    \BODY
+\end{tikzpicture}\tikzexternaldisable\endgroup}
 
 %% Extension: Chess
-%% --------
-
 \ifem@loadchessextension@
 \usepackage{chessfss}
 \setfigfontfamily{berlin}%
@@ -462,30 +397,30 @@
 \def\em@B{{em@chess@black}}\def\em@W{{em@chess@white}}
 
 \def\em@extension@chess@SetDataForChess{%
-    \emSetFieldSize{8cm}{8cm}%
-    \emSetTileSize{1cm}{1cm}%
-    \emSetPlayerSize{.95cm}{1cm}%
-    \emSetTileOffset{1cm}{1cm}%
-    \emSetField{%
-        0/\em@W\em@B\em@W\em@B\em@W\em@B\em@W\em@B,
-        0/\em@B\em@W\em@B\em@W\em@B\em@W\em@B\em@W,
-        0/\em@W\em@B\em@W\em@B\em@W\em@B\em@W\em@B,
-        0/\em@B\em@W\em@B\em@W\em@B\em@W\em@B\em@W,
-        0/\em@W\em@B\em@W\em@B\em@W\em@B\em@W\em@B,
-        0/\em@B\em@W\em@B\em@W\em@B\em@W\em@B\em@W,
-        0/\em@W\em@B\em@W\em@B\em@W\em@B\em@W\em@B,
-        0/\em@B\em@W\em@B\em@W\em@B\em@W\em@B\em@W%
-    }%
-    %Border:
-    \def\em@draw@field@background{%
-        \draw[line width=1.5pt] (0,0) rectangle ++(\em@len@field@w,-\em@len@field@h);
-        \foreach[count=\em@i] \em@a in {A,...,H}{%
-            \node[below] (em@chess@letternode@\em@a) at (\em@i-.5, -\em@len@field@h) {\em@a};
-            \node[above] (em@chess@letternodeupper@\em@a) at (\em@i-.5, 0) {\em@a};
-            \node[left] (em@chess@numbernode@\em@i) at(0,-8+\em@i-.5) {\em@i};
-            \node[right] (em@chess@numbernoderight@\em@i) at(\em@len@field@w,-8+\em@i-.5) {\em@i};
-        }
-    }%
+\emSetFieldSize{8cm}{8cm}%
+\emSetTileSize{1cm}{1cm}%
+\emSetPlayerSize{.95cm}{1cm}%
+\emSetTileOffset{1cm}{1cm}%
+\emSetField{%
+    0/\em@W\em@B\em@W\em@B\em@W\em@B\em@W\em@B,
+    0/\em@B\em@W\em@B\em@W\em@B\em@W\em@B\em@W,
+    0/\em@W\em@B\em@W\em@B\em@W\em@B\em@W\em@B,
+    0/\em@B\em@W\em@B\em@W\em@B\em@W\em@B\em@W,
+    0/\em@W\em@B\em@W\em@B\em@W\em@B\em@W\em@B,
+    0/\em@B\em@W\em@B\em@W\em@B\em@W\em@B\em@W,
+    0/\em@W\em@B\em@W\em@B\em@W\em@B\em@W\em@B,
+    0/\em@B\em@W\em@B\em@W\em@B\em@W\em@B\em@W%
+}%
+%Border:
+\def\em@draw@field@background{%
+    \draw[line width=1.5pt] (0,0) rectangle ++(\em@len@field@w,-\em@len@field@h);
+    \foreach[count=\em@i] \em@a in {A,...,H}{%
+        \node[below] (em@chess@letternode@\em@a) at (\em@i-.5, -\em@len@field@h) {\em@a};
+        \node[above] (em@chess@letternodeupper@\em@a) at (\em@i-.5, 0) {\em@a};
+        \node[left] (em@chess@numbernode@\em@i) at(0,-8+\em@i-.5) {\em@i};
+        \node[right] (em@chess@numbernoderight@\em@i) at(\em@len@field@w,-8+\em@i-.5) {\em@i};
+    }
+}%
 }
 
 \colorlet{chesswhite}{purple}
@@ -496,19 +431,12 @@
     \ifx\tmp@a\tmp@b\relax% white figure
         \node[chesswhite] at (#1) {\bfseries\huge#3};%
     \else% black figure
-        \node[chessblack] at (#1) {\bfseries\huge#3};% \boardfont\rlap{\lowercase{#3}}{\color{white}\uppercase{#3}} (the font isn't centered ^^ )
+        \node[chessblack] at (#1) {\bfseries\huge#3};%
     \fi
-    % \fill[#2,#3] (#1) ellipse[x radius=\em@len@player@w/2,y radius=\em@len@player@h/2];%
-    \edef\em@tmp{\noexpand\coordinate (#4\@nameuse{theem@counter@player@#4@tokens}) at(#1);}\em@tmp% mark!
+    \coordinate (#4\csname theem@counter@player@#4@tokens\endcsname) at(#1);
 }
-% r: rook one
-% m: knight one
-% b: bishop one
-% l: queen
-% k: king
-% a: bishop two
-% n: knight two
-% s: rook two
+% r: rook one, m: knight one, b: bishop one, l: queen
+% k: king, a: bishop two, n: knight two, s: rook two
 % p: pawn
 \emCreatePlayer[p]{white}{White-Player}{white}{chessfigure}
 \emCreatePlayer[p]{black}{Black-Player}{black}{chessfigure}
@@ -527,59 +455,54 @@
     \@ifundefined{@em@extension@chess@figures@#1}{%
         \PackageError{eagle-maps}{The Chess-Figure '#1' is unknown!}{Maybe you have a typo or something? Valid Figures are: rookA,rookB, knightA, knightB, bishopA, bishopB, queen, king and pawn.}%
     }{%
-        \@nameuse{@em@extension@chess@figures@#1}%
+        \csname @em@extension@chess@figures@#1\endcsname
     }%
 }
 
 
 % exepects up to 8 lines of 8 figures,being placed on the board.
 \def\em@extension@chess@setBoard#1{%
-    \setcounter{em@counter@tmp@a}{0}% emline counter
-    \setcounter{em@counter@tmp@b}{0}% pawn counter white
-    \setcounter{em@counter@tmp@c}{0}% pawn counter black
-    \def\em@tmp@white{white}%
-    \foreach[count=\em@linei] \em@line in {#1}{%
-        \foreach \em@figure in \em@line{
-            \stepcounter{em@counter@tmp@a}
-            \ifx\em@figure\@empty\else% only if something is set
-            \edef\em@tmp{\noexpand\@em@helper@player@checkopt\em@figure:\noexpand\@nil}\em@tmp%
-            % \em@data@tmp@b will now contain first, \em@data@tmp@c second if given
-            \ifx\em@data@tmp@c\@empty% no optional => pawn
-                \@nameuse{\em@data@tmp@b set}[\@em@extension@chess@figures@get{pawn}]{emline\theem@counter@tmp@a}%
-                \ifx\em@data@tmp@b\em@tmp@white%white pawn
-                    \stepcounter{em@counter@tmp@b}%
-                    \coordinate (\em@data@tmp@b pawn\Alph{em@counter@tmp@b}) at (emline\theem@counter@tmp@a);
-                \else % black pawn
-                    \stepcounter{em@counter@tmp@c}%
-                    \coordinate (\em@data@tmp@b pawn\Alph{em@counter@tmp@c}) at (emline\theem@counter@tmp@a);
-                \fi
-            \else% optional given => use
-                \@nameuse{\em@data@tmp@b set}[\@em@extension@chess@figures@get{\em@data@tmp@c}]{emline\theem@counter@tmp@a}%
-                \coordinate (\em@data@tmp@b\em@data@tmp@c) at (emline\theem@counter@tmp@a);
-            \fi%
-            \fi%
-        }%
-        \pgfmathsetmacro{\em@tmp@linetar}{int(\em@linei*8)}%
-        \setcounter{em@counter@tmp@a}{\em@tmp@linetar}%
-    }
-}
+\setcounter{em@counter@tmp@a}{0}% emline counter
+\setcounter{em@counter@tmp@b}{0}% pawn counter white
+\setcounter{em@counter@tmp@c}{0}% pawn counter black
+\def\em@tmp@white{white}%
+\foreach[count=\em@linei] \em@line in {#1}{%
+\foreach \em@figure in \em@line{
+    \stepcounter{em@counter@tmp@a}
+    \ifx\em@figure\@empty\else% only if something is set
+    \edef\em@tmp{\noexpand\@em@helper@player@checkopt\em@figure:\noexpand\@nil}\em@tmp
+    % \em@data@tmp@b will now contain first, \em@data@tmp@c second if given
+    \ifx\em@data@tmp@c\@empty% no optional => pawn
+        \csname\em@data@tmp@b set\endcsname[\@em@extension@chess@figures@get{pawn}]{emline\theem@counter@tmp@a}%
+        \ifx\em@data@tmp@b\em@tmp@white%white pawn
+            \stepcounter{em@counter@tmp@b}%
+            \coordinate (\em@data@tmp@b pawn\Alph{em@counter@tmp@b}) at (emline\theem@counter@tmp@a);
+        \else % black pawn
+            \stepcounter{em@counter@tmp@c}%
+            \coordinate (\em@data@tmp@b pawn\Alph{em@counter@tmp@c}) at (emline\theem@counter@tmp@a);
+        \fi
+    \else% optional given => use
+        \csname\em@data@tmp@b set\endcsname[\@em@extension@chess@figures@get{\em@data@tmp@c}]{emline\theem@counter@tmp@a}%
+        \coordinate (\em@data@tmp@b\em@data@tmp@c) at (emline\theem@counter@tmp@a);
+    \fi\fi
+}%
+\setcounter{em@counter@tmp@a}{\the\numexpr\em@linei*8}%
+}}
 
 \def\em@chess@coordinates{%
-    \setcounter{em@counter@tmp@a}{0}% emline counter
-    \foreach \em@number in {8,...,1}{%
-        \foreach \em@letter in {A,...,H}{%
-            \stepcounter{em@counter@tmp@a}%
-            \coordinate (\em@letter\em@number) at (emline\theem@counter@tmp@a);%
-        }%
+\setcounter{em@counter@tmp@a}{0}% emline counter
+\foreach \em@number in {8,...,1}{%
+    \foreach \em@letter in {A,...,H}{%
+        \stepcounter{em@counter@tmp@a}%
+        \coordinate (\em@letter\em@number) at (emline\theem@counter@tmp@a);%
     }%
-}%
+}}%
 
 \newcommand\emChessSetBoard[1]{\em@extension@chess@setBoard{#1}}
-
 \newenvironment{em-chess*}{%
-    \begingroup\em@extension@chess@SetDataForChess{}%
-    \begin{eagle-map*}
-        \em@chess@coordinates{}%
+\begingroup\em@extension@chess@SetDataForChess{}%
+\begin{eagle-map*}
+    \em@chess@coordinates{}%
 }{\end{eagle-map*}\endgroup}
 
 \newenvironment{em-chess}[1]{%
@@ -587,64 +510,54 @@
     \@nameuse{eagle-map}{#1}
         \em@chess@coordinates{}
 }{\@nameuse{endeagle-map}\endgroup}
-
 \fi
 
-
-
-
 %% Extension: Hexxagon
-%% --------
-
 \ifem@loadhexxagonextension@
 \emCreatePlayer[eagle-maps-images/playerA]{playerA}{Player A}{red}{image}
 \emCreatePlayer[eagle-maps-images/playerB]{playerB}{Player B}{blue}{image}
 
 \def\em@extension@hexxagon@SetDataForHexxagon{%
-    \emSetField{%
-        5*.75/T,%1
-        4*.75/TT,%2
-        3*.75/TTT,%3
-        2*.75/TTTT,%4
-        .75/TTVTT,%5
-        2*.75/TTTT,%6
-        .75/TVTVT,%7
-        2*.75/TTTT,%8
-        .75/VTVTV,%9
-        2*.75/TTTT,%10
-        .75/TVTVT,%11
-        2*.75/TTTT,%12
-        .75/TTVTT,%13
-        2*.75/TTTT,%14
-        3*.75/TTT,%15
-        4*.75/TT,%16
-        5*.75/T%17
-    }%
-    \emSetBackground{eagle-maps-images/background}%
-    \emCreateTile[eagle-maps-images/tile]{T}{image}%
-    \emCreateTile[eagle-maps-images/tilevoid]{V}{image}%
-    \emSetFieldSize{15cm}{7.5cm}%
-    \emSetTileSize{.1195\em@len@field@w}{.5\em@len@tile@w}%
-    \emSetTileOffset{1.5\em@len@tile@w}{.23\em@len@tile@w}%
-    \emSetPlayerSize{.675\em@len@tile@w}{\em@len@tile@h}%
-    \def\emHexxagonDefaultCols{
-        \emCalculateCols[2*\em@len@tile@offset@y]{%
-            {1*.75/4/5},%
-            {2*.75/3/6},%
-            {3*.75/2/7},%
-            {4*.75/1/8},%
-            {5*.75/0/9},%
-            {6*.75/1/8},%
-            {7*.75/2/7},%
-            {8*.75/3/6},%
-            {9*.75/4/5}%
-        }%
-    }
-}
-\def\em@extension@hexxagon@SetDataForHexxagon@reset{%
-    \emSetField{}%
-    \emSetBackground{}%
-}
+\emSetField{%
+    5*.75/T,%1
+    4*.75/TT,%2
+    3*.75/TTT,%3
+    2*.75/TTTT,%4
+    .75/TTVTT,%5
+    2*.75/TTTT,%6
+    .75/TVTVT,%7
+    2*.75/TTTT,%8
+    .75/VTVTV,%9
+    2*.75/TTTT,%10
+    .75/TVTVT,%11
+    2*.75/TTTT,%12
+    .75/TTVTT,%13
+    2*.75/TTTT,%14
+    3*.75/TTT,%15
+    4*.75/TT,%16
+    5*.75/T%17
+}%
+\emSetBackground{eagle-maps-images/background}%
+\emCreateTile[eagle-maps-images/tile]{T}{image}%
+\emCreateTile[eagle-maps-images/tilevoid]{V}{image}%
+\emSetFieldSize{15cm}{7.5cm}%
+\emSetTileSize{.1195\em@len@field@w}{.5\em@len@tile@w}%
+\emSetTileOffset{1.5\em@len@tile@w}{.23\em@len@tile@w}%
+\emSetPlayerSize{.675\em@len@tile@w}{\em@len@tile@h}%
+\def\emHexxagonDefaultCols{
+\emCalculateCols[2*\em@len@tile@offset@y]{%
+    {1*.75/4/5},%
+    {2*.75/3/6},%
+    {3*.75/2/7},%
+    {4*.75/1/8},%
+    {5*.75/0/9},%
+    {6*.75/1/8},%
+    {7*.75/2/7},%
+    {8*.75/3/6},%
+    {9*.75/4/5}%
+}%
+}}
+\def\em@extension@hexxagon@SetDataForHexxagon@reset{\emSetField{}\emSetBackground{}}
 
 % being lazy, copy pasty :P
 \newenvironment{em-hexxagon*}[1][]{%
