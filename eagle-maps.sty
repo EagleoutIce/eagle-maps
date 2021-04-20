@@ -16,6 +16,8 @@
 \DeclareOption{chess}{\em@loadchessextension@true}
 \newif\ifem@loadhexxagonextension@
 \DeclareOption{hexxagon}{\em@loadhexxagonextension@true}
+\newif\ifem@loadchompextension@
+\DeclareOption{chomp}{\em@loadchompextension@true}
 \ProcessOptions\relax
 
 %% Lenghts/Dimens/Counters
@@ -321,7 +323,7 @@ png import/.code={%
 }}
 
 %% User Level Macros
-\newcommand*\emSetField[1]{\xdef\em@data@field{#1}}
+\newcommand*\emSetField[1]{\protected@xdef\em@data@field{#1}}
 % #1: width, #2: height
 \newcommand*\emSetFieldSize[2]{%
     \em@len@field@w=#1\relax \em@len@field@h=#2%
@@ -573,5 +575,24 @@ png import/.code={%
     \@nameuse{eagle-map}{#2}%
         \ifx!#1!\emHexxagonDefaultCols{}\fi
     }{\@nameuse{endeagle-map}\em@extension@hexxagon@SetDataForHexxagon@reset\endgroup}
+\fi
+
+%% Extension: chomp
+\ifem@loadchompextension@
+\emCreateTile[]{0}{chomp}
+\emCreateTile[I]{1}{chomp}
+\emCreateTile[II]{2}{chomp}
+\emCreateTile[!]{I}{chomp}
+\emCreateTile[\noexpand\resizebox{.9\noexpand\em@len@tile@w}{!}{$\noexpand\bigotimes$}]{X}{chomp}
+\def\em@draw@tile@chomp#1{%
+    \draw[sharp corners] (\em@len@tmp@x,\em@len@tmp@y) rectangle ++(\em@len@tile@w,-\em@len@tile@h) node[midway,centered] {$#1$};%
+}
+\newenvironment{em-chomp}[1][]{%
+\begingroup\ifx!#1!\else\emSetField{#1}\fi
+\@nameuse{eagle-map}}{\@nameuse{endeagle-map}\endgroup}
+
+\newenvironment{em-chomp*}[1][]{%
+\begingroup\ifx!#1!\else\emSetField{#1}\fi
+\begin{eagle-map*}}{\end{eagle-map*}\endgroup}
 \fi
 \endinput
