@@ -51,9 +51,7 @@
 
 %will hold the current maximum for the playerids
 \newcounter{em@counter@player@id}
-\newcounter{em@counter@tmp@a}
-\newcounter{em@counter@tmp@b}
-\newcounter{em@counter@tmp@c}
+\newcounter{em@counter@tmp@a}\newcounter{em@counter@tmp@b}\newcounter{em@counter@tmp@c}
 
 %% Data-Registers
 % ',' seperated list of '/'-seperated pairs (pgffor)
@@ -238,7 +236,7 @@
 %% Tile drawers:
 \def\em@draw@tile@void#1{}
 \def\em@draw@tile@color#1{%
-    \fill[#1] (\em@len@tmp@x,\em@len@tmp@y) rectangle ++(\em@len@tile@w,-\em@len@tile@h);%
+    \path[fill,#1] (\em@len@tmp@x,\em@len@tmp@y) rectangle ++(\em@len@tile@w,-\em@len@tile@h);%
 }
 \def\em@draw@tile@text#1{%
     \node at(\em@len@tmp@x+\em@len@tile@w/2,\em@len@tmp@y-\em@len@tile@h/2) {#1};
@@ -256,7 +254,7 @@
 % target coordinates | color | optional argument | player-shortcut
 % note: #3 is tikzargs
 \def\em@draw@player@color#1#2#3#4{%
-    \fill[#2,#3] (#1) ellipse[x radius=\em@len@player@w/2,y radius=\em@len@player@h/2];%
+    \path[fill,#2,#3] (#1) ellipse[x radius=\em@len@player@w/2,y radius=\em@len@player@h/2];%
     \coordinate (#4\csname theem@counter@player@#4@tokens\endcsname) at(#1);
 }
 
