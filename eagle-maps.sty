@@ -226,7 +226,7 @@
 %% Background Drawers:
 \def\em@draw@background@image{%
 \ifx\em@data@background@image\@empty\else
-\draw[color=black!0,use as bounding box, path picture={%
+\path[draw,color=black!0,use as bounding box, path picture={%
     \node at (path picture bounding box.center) {%
         \includegraphics[width=\em@len@field@w]{\em@data@background@image}
     };%
@@ -415,7 +415,7 @@ png import/.code={%
 }%
 %Border:
 \def\em@draw@field@background{%
-    \draw[line width=1.5pt] (0,0) rectangle ++(\em@len@field@w,-\em@len@field@h);
+    \path[draw,line width=1.5pt] (0,0) rectangle ++(\em@len@field@w,-\em@len@field@h);
     \foreach[count=\em@i] \em@a in {A,...,H}{%
         \node[below] (em@chess@letternode@\em@a) at (\em@i-.5, -\em@len@field@h) {\em@a};
         \node[above] (em@chess@letternodeupper@\em@a) at (\em@i-.5, 0) {\em@a};
@@ -585,7 +585,7 @@ png import/.code={%
 \emCreateTile[!]{I}{chomp}
 \emCreateTile[\noexpand\resizebox{.715\noexpand\em@len@tile@w}{!}{$\noexpand\bigotimes$}]{X}{chomp}
 \def\em@draw@tile@chomp#1{%
-    \draw[sharp corners] (\em@len@tmp@x,\em@len@tmp@y) rectangle ++(\em@len@tile@w,-\em@len@tile@h) node[midway,centered] {$#1$};%
+    \path[draw,sharp corners] (\em@len@tmp@x,\em@len@tmp@y) rectangle ++(\em@len@tile@w,-\em@len@tile@h) node[midway,centered] {$#1$};%
 }
 \newenvironment{em-chomp}[1][]{%
 \begingroup\ifx!#1!\else\emSetField{#1}\fi
