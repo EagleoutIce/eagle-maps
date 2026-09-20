@@ -5,8 +5,32 @@
 \usepackage[utf8]{inputenc}
 \usepackage[total={6in,9in}]{geometry}
 
-\usepackage{float,LILLYxLISTINGS}
+\usepackage{float,etoolbox}
+\usepackage[listings,skins]{tcolorbox}
+
+\makeatletter
+% the package and its language definitions live in the submodule
+\appto\input@path{{lib/xlistings/}{lib/xlistings/langs/}}
+\makeatother
+\usepackage{lib/xlistings/xlistings}
+\LoadLanguages{latex}
+
 \usepackage[chess,hexxagon]{eagle-maps}
+\usepackage{hyperref}
+
+\let\T\texttt
+\def\lstkwthree#1{\xlstGet{keywordC}{#1}}
+\def\lstkwfive#1{\xlstGet{command}{#1}}
+\def\lstcomment#1{\xlstGet{comments}{#1}}
+
+\emergencystretch=3em
+
+% #1: listing options, #2: tcolorbox options, #3: language
+\NewTCBListing{plainlst}{O{}O{}m}{blankest,
+    listing options={style=xlst@MAIN,frame=none,rulecolor={},backgroundcolor={},
+        numbers=none,numbersep=0pt,xleftmargin=0pt,xrightmargin=0pt,
+        language=#3,#1},
+    #2}
 
 \def\email#1{\href{mailto:#1}{#1}}
 
@@ -16,8 +40,8 @@
 \def\cmd#1{\lstkwfive{\textbackslash#1}}
 \def\env#1{\lstkwthree{env@#1}}
 
-\def\cmdref#1{\hyperref[mrk:#1]{\lstkwfive{\textbackslash#1}}\textsuperscript{\(\rightarrow\,\)p. \pageref{mrk:#1}}}
-\def\envref#1{\hyperref[mrk:#1]{\lstkwthree{env@#1}}\textsuperscript{\(\rightarrow\,\)p. \pageref{mrk:#1}}}
+\def\cmdref#1{\hyperref[mrk:#1]{\lstkwfive{\textbackslash#1}}\allowbreak\textsuperscript{\(\rightarrow\,\)p. \pageref{mrk:#1}}}
+\def\envref#1{\hyperref[mrk:#1]{\lstkwthree{env@#1}}\allowbreak\textsuperscript{\(\rightarrow\,\)p. \pageref{mrk:#1}}}
 
 \makeatletter
 % #1: name of the present-sequence
@@ -54,7 +78,7 @@
     }
 \end{center}
     \begin{abstract}
-        This package was designed to create maps consisting of different tiles from a top-down perspective. It supports the creation of tiles and players, externalization and some other features regarding typesetting the maps. All Code highlighting will be performed with the \T{LILLYxLISTINGS}-Library from the Lilly-Framework.\footnote{\url{https://github.com/EagleoutIce/LILLY}}
+        This package was designed to create maps consisting of different tiles from a top-down perspective. It supports the creation of tiles and players, externalization and some other features regarding typesetting the maps. All Code highlighting will be performed with the \T{xlistings}-package.\footnote{\url{https://github.com/EagleoutIce/xlistings}}
     \end{abstract}
 
 \section{Prerequisites}
@@ -63,7 +87,6 @@
 This Package depends on \T{tikz}\footnote{https://www.ctan.org/pkg/pgf} and \T{environ}.\footnote{https://www.ctan.org/pkg/environ} Furthermore the \T{tikz}-libraries \T{calc} and \T{external} will be loaded.
 
 \subsection{How to use this library}
-\let\T\texttt
 Just put: \blatex{\\input\{eagle-maps\}} into your preamble and place the \T{eagle-maps.sty} in the same folder. Otherwise, you can place it into your \T{texmf}-tree to make it globally available.
 
 \subsection{How to read the documentation}
@@ -228,7 +251,7 @@ By the way, you can refer to the placed player-tokens as well, they will be numb
 \section{Included Extensions}
 \subsection{Chess}
 
-To Load this extension, you have to pass \T{chess} as an argument while loading this package: \blatex{\\usepackage[chess]\{eagle-maps\}}. Loading this Package will create the Players \T{black} and \T{white}. Furthermore it will cause the \T{chessfss}-Package to be loaded.
+To Load this extension, you have to pass \T{chess} as an argument while loading this package: \blatex[breakatwhitespace=false]{\\usepackage[chess]\{eagle-maps\}}. Loading this Package will create the Players \T{black} and \T{white}. Furthermore it will cause the \T{chessfss}-Package to be loaded.
 
 \begin{environment}{em-chess*}{}
     Will create a Chess-Field using \envref{eagle-map*}. Inside of this chess-field you can access individual tiles by their (uppercase) chess-coordinate (like \T{A7}, \T{G5}, \ldots).
@@ -263,7 +286,7 @@ To Load this extension, you have to pass \T{chess} as an argument while loading 
 \clearpage
 \subsection{Hexxagon}
 
-This extension is work in progress. You can enable it by adding \T{hexxagon} to the list of package-options: \blatex{\\usepackage[hexxagon]\{eagle-maps\}}. Furthermore this Package needs the folder \T{eagle-maps-images} to be located in the same directory! Loading this Package will create the Players \T{playerA} and \T{playerB} using \cmdref{emCreatePlayer}. Furthermore \cmdref{emCalculateCols} will be execute with the correct data.
+This extension is work in progress. You can enable it by adding \T{hexxagon} to the list of package-options: \blatex[breakatwhitespace=false]{\\usepackage[hexxagon]\{eagle-maps\}}. Furthermore this Package needs the folder \T{eagle-maps-images} to be located in the same directory! Loading this Package will create the Players \T{playerA} and \T{playerB} using \cmdref{emCreatePlayer}. Furthermore \cmdref{emCalculateCols} will be execute with the correct data.
 
 \begin{environment}{em-hexxagon*}{\optArg{FieldData}}
     Will create a Hexxagon-Field using \envref{eagle-map*}:
